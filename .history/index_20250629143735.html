@@ -306,30 +306,9 @@
                         <a href="#services" class="nav-link text-gray-800 font-semibold px-2"
                                 >Services</a
                         >
-                        <a href="#booking" id="nav-booking-link" class="nav-link text-gray-800 font-semibold px-2">
-                                Booking
-                        </a>
-                        <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                        const navBookingLink = document.getElementById("nav-booking-link");
-                                        const bookingModal = document.getElementById("booking-modal");
-                                        const bookingIdDisplay = document.getElementById("booking-id");
-                                        function generateBookingId() {
-                                                const timestamp = Date.now().toString().slice(-6);
-                                                const random = Math.floor(Math.random() * 1000)
-                                                        .toString()
-                                                        .padStart(3, "0");
-                                                return `WM${timestamp}${random}`;
-                                        }
-                                        if (navBookingLink && bookingModal && bookingIdDisplay) {
-                                                navBookingLink.addEventListener("click", function (e) {
-                                                        e.preventDefault();
-                                                        bookingModal.classList.remove("hidden");
-                                                        bookingIdDisplay.textContent = generateBookingId();
-                                                });
-                                        }
-                                });
-                        </script>
+                        <a href="#booking" class="nav-link text-gray-800 font-semibold px-2"
+                                >Booking</a
+                        >
                         <a href="#gallery" class="nav-link text-gray-800 font-semibold px-2"
                                 >Gallery</a
                         >

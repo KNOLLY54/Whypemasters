@@ -3673,15 +3673,6 @@
         resetStars();
       });
     </script>
-    // Place this at the end of booking.html before </body>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const userName = localStorage.getItem('whype_user_name') || 'Guest';
-    const greeting = document.getElementById('user-greeting');
-    const sidebarName = document.getElementById('sidebar-user-name');
-    if (greeting) greeting.textContent = `Hello, ${userName}`;
-    if (sidebarName) sidebarName.textContent = userName;
-});
-</script>
+    
   </body>
 </html>

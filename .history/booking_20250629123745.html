@@ -1,0 +1,2446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhypeMasters - Car Detailing Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#3E8CFF',secondary:'#34C759'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(62, 140, 255, 0.15);
+            border-left: 3px solid #3E8CFF;
+        }
+        
+        .sidebar-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .service-card.selected {
+            border-color: #3E8CFF;
+            box-shadow: 0 0 15px rgba(62, 140, 255, 0.3);
+        }
+        
+        .time-slot.available {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+        
+        .time-slot.selected {
+            background: rgba(62, 140, 255, 0.2);
+            border: 1px solid #3E8CFF;
+        }
+        
+        .time-slot.unavailable {
+            background: rgba(255, 59, 48, 0.05);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+        
+        .appointment-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(31, 38, 135, 0.18);
+        }
+        
+        .calendar-day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover:not(.disabled) {
+            background: rgba(62, 140, 255, 0.1);
+        }
+        
+        .calendar-day.selected {
+            background: #3E8CFF;
+            color: white;
+        }
+        
+        .calendar-day.disabled {
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+        
+        .calendar-day.today {
+            border: 1px solid #3E8CFF;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3E8CFF;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        input[type="checkbox"] {
+            display: none;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: rgba(209, 213, 219, 0.5);
+            border-radius: 13px;
+            transition: all 0.3s;
+        }
+        
+        .toggle-switch:after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+        
+        input[type="checkbox"]:checked + .toggle-switch {
+            background: rgba(62, 140, 255, 0.7);
+        }
+        
+        input[type="checkbox"]:checked + .toggle-switch:after {
+            left: calc(100% - 24px);
+        }
+        
+        .star-rating input {
+            display: none;
+        }
+        
+        .star-rating label {
+            cursor: pointer;
+            color: #D1D5DB;
+            transition: color 0.2s;
+        }
+        
+        .star-rating input:checked ~ label {
+            color: #FFB340;
+        }
+        
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #FFB340;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 50;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .mobile-nav {
+                display: flex;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-bottom: 70px;
+            }
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar fixed h-full w-64 glassmorphism z-40 transition-all duration-300 ease-in-out">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="p-6 flex items-center">
+                    <div class="w-20 h-20 flex items-center justify-center rounded-full text-white mr-3">
+                        <img src="https://res.cloudinary.com/dtrn8j0sz/image/upload/v1751191021/whype-logo_bbglxm.png" alt="WhypeMasters Logo" class="w-20 h-20 object-contain rounded-full" style="background: rgba(0,82,204,0.18); border: 2px solid #0052CC; backdrop-filter: blur(10px); border-radius: 9999px;">
+                    </div>
+                    <h1 class="text-0.5xl   text-primary">WhypeMasters</h1>
+                </div>
+                
+                
+                <!-- Navigation -->
+                <nav class="flex-1 px-4 py-6">
+                    <ul class="space-y-1">
+                        <li>
+                            <button class="sidebar-item flex items-center w-full px-4 py-3 text-gray-700 rounded-button transition-all duration-200 active" data-target="dashboard">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3">
+                                    <i class="ri-dashboard-line ri-lg"></i>
+                                </div>
+                                <span>Dashboard</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="sidebar-item flex items-center w-full px-4 py-3 text-gray-700 rounded-button transition-all duration-200" data-target="book">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3">
+                                    <i class="ri-calendar-check-line ri-lg"></i>
+                                </div>
+                                <span>Book a Session</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="sidebar-item flex items-center w-full px-4 py-3 text-gray-700 rounded-button transition-all duration-200" data-target="appointments">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3">
+                                    <i class="ri-time-line ri-lg"></i>
+                                </div>
+                                <span>My Appointments</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="sidebar-item flex items-center w-full px-4 py-3 text-gray-700 rounded-button transition-all duration-200" data-target="review">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3">
+                                    <i class="ri-star-line ri-lg"></i>
+                                </div>
+                                <span>Submit Review</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="sidebar-item flex items-center w-full px-4 py-3 text-gray-700 rounded-button transition-all duration-200" data-target="settings">
+                                <div class="w-8 h-8 flex items-center justify-center mr-3">
+                                    <i class="ri-settings-3-line ri-lg"></i>
+                                </div>
+                                <span>Settings</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Profile -->
+                <div class="p-4 mt-auto">
+                    <div class="glassmorphism rounded-button p-3 flex items-center relative group">
+                        <!-- Profile Photo or Initials -->
+                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white overflow-hidden" id="sidebar-profile-photo-area">
+                            <span id="sidebar-profile-initials">JD</span>
+                            <img id="sidebar-profile-photo-img" src="" alt="Profile Photo" class="hidden w-10 h-10 rounded-full object-cover">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-800" id="sidebar-profile-name">John Doe</p>
+                            <p class="text-xs text-gray-500" id="sidebar-profile-membership">Premium Member</p>
+                        </div>
+                        <button title="Logout" id="sidebar-logout-btn" class="ml-auto w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                            <i class="ri-logout-box-line"></i>
+                        </button>
+                        <!-- Logout confirmation tooltip -->
+                        <div id="sidebar-logout-tooltip" class="absolute right-10 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-button px-3 py-2 text-xs text-gray-700 shadow-lg hidden z-50">
+                            Click to logout
+                        </div>
+                    </div>
+                </div>
+                <!-- Logout Confirmation Modal -->
+                <div id="logout-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                    <div class="bg-white rounded-button p-6 w-full max-w-xs shadow-lg relative">
+                        <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" id="logout-modal-close">
+                            <i class="ri-close-line text-2xl"></i>
+                        </button>
+                        <h4 class="text-lg font-semibold mb-4 text-gray-800">Logout</h4>
+                        <p class="mb-6 text-gray-700">Are you sure you want to logout?</p>
+                        <div class="flex gap-3">
+                            <button type="button" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-button" id="logout-cancel-btn">
+                                Cancel
+                            </button>
+                            <button type="button" class="flex-1 py-2 bg-red-500 text-white rounded-button" id="logout-confirm-btn">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                // Sidebar profile sync and logout logic
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Sync profile info from settings
+                    function syncSidebarProfile() {
+                        const name = document.getElementById('settings-fullname')?.value || "John Doe";
+                        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                        document.getElementById('sidebar-profile-name').textContent = name;
+                        document.getElementById('sidebar-profile-initials').textContent = initials;
+                        // Membership (static for demo)
+                        document.getElementById('sidebar-profile-membership').textContent = "Premium Member";
+                        // Profile photo
+                        const img = document.getElementById('profile-photo-img');
+                        const sidebarImg = document.getElementById('sidebar-profile-photo-img');
+                        const sidebarInitials = document.getElementById('sidebar-profile-initials');
+                        if (img && !img.classList.contains('hidden') && img.src) {
+                            sidebarImg.src = img.src;
+                            sidebarImg.classList.remove('hidden');
+                            sidebarInitials.classList.add('hidden');
+                        } else {
+                            sidebarImg.classList.add('hidden');
+                            sidebarInitials.classList.remove('hidden');
+                        }
+                    }
+                    // Initial sync
+                    syncSidebarProfile();
+                    // Sync on profile changes
+                    const fullnameInput = document.getElementById('settings-fullname');
+                    if (fullnameInput) {
+                        fullnameInput.addEventListener('input', syncSidebarProfile);
+                    }
+                    const profilePhotoInput = document.getElementById('profile-photo-input');
+                    if (profilePhotoInput) {
+                        profilePhotoInput.addEventListener('change', function () {
+                            setTimeout(syncSidebarProfile, 300);
+                        });
+                    }
+
+                    // Logout button logic
+                    const logoutBtn = document.getElementById('sidebar-logout-btn');
+                    const tooltip = document.getElementById('sidebar-logout-tooltip');
+                    let tooltipTimeout;
+                    logoutBtn.addEventListener('mouseenter', function () {
+                        tooltip.classList.remove('hidden');
+                        clearTimeout(tooltipTimeout);
+                    });
+                    logoutBtn.addEventListener('mouseleave', function () {
+                        tooltipTimeout = setTimeout(() => tooltip.classList.add('hidden'), 200);
+                    });
+                    logoutBtn.addEventListener('focus', function () {
+                        tooltip.classList.remove('hidden');
+                    });
+                    logoutBtn.addEventListener('blur', function () {
+                        tooltip.classList.add('hidden');
+                    });
+                    logoutBtn.addEventListener('click', function () {
+                        document.getElementById('logout-modal').classList.remove('hidden');
+                    });
+
+                    // Logout modal logic
+                    document.getElementById('logout-modal-close').onclick =
+                        document.getElementById('logout-cancel-btn').onclick = function () {
+                        document.getElementById('logout-modal').classList.add('hidden');
+                    };
+                    document.getElementById('logout-confirm-btn').onclick = function () {
+                        // Implement logout logic here (clear session, redirect, etc.)
+                        // For demo, just reload
+                        window.location.reload();
+                    };
+                    // Close modal on background click
+                    document.getElementById('logout-modal').addEventListener('click', function (e) {
+                        if (e.target === this) this.classList.add('hidden');
+                    });
+                });
+                </script>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav fixed bottom-0 left-0 right-0 glassmorphism py-3 px-6 z-40 md:hidden">
+            <div class="flex justify-between items-center gap-8">
+                <button class="w-12 h-12 flex flex-col items-center justify-center text-gray-700" data-target="dashboard">
+                    <i class="ri-dashboard-line ri-lg"></i>
+                    <span class="text-xs mt-1">Dashboard</span>
+                </button>
+                <button class="w-12 h-12 flex flex-col items-center justify-center text-gray-700" data-target="book">
+                    <i class="ri-calendar-check-line ri-lg"></i>
+                    <span class="text-xs mt-1">Book</span>
+                </button>
+                <button class="w-12 h-12 flex flex-col items-center justify-center text-gray-700" data-target="appointments">
+                    <i class="ri-time-line ri-lg"></i>
+                    <span class="text-xs mt-1">Appointments</span>
+                </button>
+                <button class="w-12 h-12 flex flex-col items-center justify-center text-gray-700" data-target="review">
+                    <i class="ri-star-line ri-lg"></i>
+                    <span class="text-xs mt-1">Review</span>
+                </button>
+                <button class="w-12 h-12 flex flex-col items-center justify-center text-gray-700" data-target="settings">
+                    <i class="ri-settings-3-line ri-lg"></i>
+                    <span class="text-xs mt-1">Settings</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu toggle -->
+        <button id="mobile-menu-toggle" class="fixed top-4 left-4 z-50 w-10 h-10 rounded-full glassmorphism flex items-center justify-center md:hidden">
+            <i class="ri-menu-line ri-lg"></i>
+        </button>
+        
+        <!-- Main Content -->
+        <div class="main-content flex-1 ml-64 transition-all duration-300 ease-in-out">
+            <!-- Header -->
+            <header class="glassmorphism sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard</h2>
+                    <p class="text-sm text-gray-500">Welcome back to WhypeMasters</p>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full glassmorphism">
+                            <i class="ri-notification-3-line"></i>
+                        </button>
+                        <span class="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-white text-xs">3</span>
+                    </div>
+                    
+                    <div class="relative">
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full glassmorphism">
+                            <i class="ri-question-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Sections -->
+            <div class="p-6">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Stats Card 1 -->
+                        <div class="glassmorphism rounded-button p-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                    <i class="ri-calendar-check-line ri-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-sm font-medium text-gray-500">Upcoming Appointments</h3>
+                                    <p class="text-2xl font-semibold text-gray-800">3</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Card 2 -->
+                        <div class="glassmorphism rounded-button p-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-secondary">
+                                    <i class="ri-history-line ri-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-sm font-medium text-gray-500">Completed Services</h3>
+                                    <p class="text-2xl font-semibold text-gray-800">12</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Card 3 -->
+                        <div class="glassmorphism rounded-button p-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500">
+                                    <i class="ri-star-line ri-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-sm font-medium text-gray-500">Average Rating</h3>
+                                    <p class="text-2xl font-semibold text-gray-800">4.8</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Next Appointment -->
+                        <!-- Next Appointment Card with Modal Triggers -->
+                        <div class="glassmorphism rounded-button p-6 lg:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Next Appointment</h3>
+                            <div class="bg-white bg-opacity-50 rounded-button p-4 mb-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">
+                                            <i class="ri-car-washing-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="font-medium text-gray-800">Premium Interior Detailing</h4>
+                                            <p class="text-sm text-gray-500">2 hours service</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-blue-100 text-primary text-sm rounded-full">Confirmed</span>
+                                </div>
+                                <div class="flex flex-wrap gap-4">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-calendar-line"></i>
+                                        </div>
+                                        <span class="text-sm text-gray-700 ml-2">June 30, 2025</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-time-line"></i>
+                                        </div>
+                                        <span class="text-sm text-gray-700 ml-2">10:00 AM - 12:00 PM</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-map-pin-line"></i>
+                                        </div>
+                                        <span class="text-sm text-gray-700 ml-2">Home Service</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="reschedule-btn" class="px-4 py-2 bg-primary text-white rounded-button flex items-center whitespace-nowrap">
+                                    <i class="ri-calendar-line mr-2"></i>
+                                    Reschedule
+                                </button>
+                                <button id="cancel-btn" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center whitespace-nowrap">
+                                    <i class="ri-close-line mr-2"></i>
+                                    Cancel
+                                </button>
+                                <button id="contact-btn" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center whitespace-nowrap">
+                                    <i class="ri-message-3-line mr-2"></i>
+                                    Contact
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Reschedule Modal -->
+                        <div id="reschedule-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                            <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                                <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="closeModal('reschedule-modal')">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold mb-4 text-gray-800">Reschedule Appointment</h4>
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Select New Date</label>
+                                        <input type="date" class="w-full px-4 py-2 border border-gray-200 rounded-button">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Select New Time</label>
+                                        <select class="w-full px-4 py-2 border border-gray-200 rounded-button">
+                                            <option>8:00 AM - 10:00 AM</option>
+                                            <option>10:00 AM - 12:00 PM</option>
+                                            <option>12:00 PM - 2:00 PM</option>
+                                            <option>2:00 PM - 4:00 PM</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="w-full py-2 bg-primary text-white rounded-button" onclick="closeModal('reschedule-modal')">
+                                        Confirm Reschedule
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Modal -->
+                        <div id="cancel-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                            <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                                <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="closeModal('cancel-modal')">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold mb-4 text-gray-800">Cancel Appointment</h4>
+                                <p class="mb-6 text-gray-700">Are you sure you want to cancel your next appointment?</p>
+                                <div class="flex gap-3">
+                                    <button type="button" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-button" onclick="closeModal('cancel-modal')">
+                                        No, Keep
+                                    </button>
+                                    <button type="button" class="flex-1 py-2 bg-red-500 text-white rounded-button" onclick="closeModal('cancel-modal')">
+                                        Yes, Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Modal -->
+                        <div id="contact-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                            <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                                <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="closeModal('contact-modal')">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                                <h4 class="text-lg font-semibold mb-4 text-gray-800">Contact Support</h4>
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                                        <textarea rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-button" placeholder="Type your message..."></textarea>
+                                    </div>
+                                    <button type="button" class="w-full py-2 bg-primary text-white rounded-button" onclick="closeModal('contact-modal')">
+                                        Send Message
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <script>
+                            // Modal open/close logic
+                            function closeModal(id) {
+                                document.getElementById(id).classList.add('hidden');
+                            }
+                            function openModal(id) {
+                                document.getElementById(id).classList.remove('hidden');
+                            }
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.getElementById('reschedule-btn').onclick = function() {
+                                    openModal('reschedule-modal');
+                                };
+                                document.getElementById('cancel-btn').onclick = function() {
+                                    openModal('cancel-modal');
+                                };
+                                document.getElementById('contact-btn').onclick = function() {
+                                    openModal('contact-modal');
+                                };
+                                // Optional: close modal on background click
+                                ['reschedule-modal','cancel-modal','contact-modal'].forEach(function(id){
+                                    const modal = document.getElementById(id);
+                                    modal && modal.addEventListener('click', function(e){
+                                        if(e.target === modal) closeModal(id);
+                                    });
+                                });
+                            });
+                        </script>
+                        
+                        <!-- Quick Book -->
+                        <div class="glassmorphism rounded-button p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Book</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Service</label>
+                                    <div class="relative">
+                                        <select class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button appearance-none pr-8">
+                                            <option>Interior Detailing</option>
+                                            <option>Exterior Wash & Wax</option>
+                                            <option>Full Detail Package</option>
+                                            <option>Engine Bay Cleaning</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                            <i class="ri-arrow-down-s-line"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                                    <input type="date" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button">
+                                </div>
+                                
+                                <button class="w-full py-3 bg-primary text-white rounded-button flex items-center justify-center whitespace-nowrap">
+                                    <i class="ri-calendar-check-line mr-2"></i>
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="mt-8">
+                        <div class="glassmorphism rounded-button p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-secondary flex-shrink-0">
+                                        <i class="ri-check-line"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-gray-800">Your appointment for <span class="font-medium">Exterior Wash & Wax</span> has been completed</p>
+                                        <p class="text-sm text-gray-500">June 20, 2025 • 2:30 PM</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                        <i class="ri-calendar-check-line"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-gray-800">New appointment for <span class="font-medium">Premium Interior Detailing</span> confirmed</p>
+                                        <p class="text-sm text-gray-500">June 25, 2025 • 10:15 AM</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 flex-shrink-0">
+                                        <i class="ri-star-line"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-gray-800">You left a <span class="font-medium">5-star review</span> for your Engine Bay Cleaning service</p>
+                                        <p class="text-sm text-gray-500">June 18, 2025 • 5:45 PM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Book a Session Section -->
+                <section id="book-section" class="content-section hidden">
+                    <div class="glassmorphism rounded-button p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Book a Detailing Session</h3>
+                        <!-- Step 1: Select Service -->
+                        <div class="mb-8">
+                            <h4 class="text-md font-medium text-gray-700 mb-4">Step 1: Select Service</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="service-list">
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Interior Detailing" data-price="25000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-steering-2-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Interior Detailing</h5>
+                                            <p class="text-sm text-gray-500">From ₦25,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Complete interior cleaning, including vacuuming, steam cleaning, and leather conditioning.</p>
+                                </div>
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Exterior Wash & Wax" data-price="18000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-car-washing-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Exterior Wash & Wax</h5>
+                                            <p class="text-sm text-gray-500">From ₦18,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Premium wash, clay bar treatment, and high-quality wax application.</p>
+                                </div>
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Engine Bay Cleaning" data-price="15000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-tools-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Engine Bay Cleaning</h5>
+                                            <p class="text-sm text-gray-500">From ₦15,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Thorough cleaning and degreasing of engine components and bay area.</p>
+                                </div>
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Paint Correction" data-price="35000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-paint-brush-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Paint Correction</h5>
+                                            <p class="text-sm text-gray-500">From ₦35,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Remove swirls, scratches, and imperfections from your vehicle's paint.</p>
+                                </div>
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Ceramic Coating" data-price="80000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-shield-star-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Ceramic Coating</h5>
+                                            <p class="text-sm text-gray-500">From ₦80,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Long-lasting protection with premium ceramic coating application.</p>
+                                </div>
+                                <div class="service-card glassmorphism rounded-button p-4 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200" data-service="Full Detail Package" data-price="45000">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                                            <i class="ri-star-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h5 class="font-medium text-gray-800">Full Detail Package</h5>
+                                            <p class="text-sm text-gray-500">From ₦45,000</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Complete interior and exterior detailing for the ultimate refresh.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 2: Service Type -->
+                        <div class="mb-8">
+                            <h4 class="text-md font-medium text-gray-700 mb-4">Step 2: Service Type</h4>
+                            <div class="flex flex-wrap gap-6">
+                                <div class="flex items-center">
+                                    <input type="radio" id="home-service" name="service-type" class="hidden" checked>
+                                    <label for="home-service" class="flex items-center cursor-pointer">
+                                        <span class="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center mr-2">
+                                            <span class="w-3 h-3 rounded-full bg-primary hidden"></span>
+                                        </span>
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 flex items-center justify-center text-primary mr-2">
+                                                <i class="ri-home-4-line"></i>
+                                            </div>
+                                            <span>Home Service</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="office-service" name="service-type" class="hidden">
+                                    <label for="office-service" class="flex items-center cursor-pointer">
+                                        <span class="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center mr-2">
+                                            <span class="w-3 h-3 rounded-full bg-primary hidden"></span>
+                                        </span>
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 flex items-center justify-center text-primary mr-2">
+                                                <i class="ri-store-2-line"></i>
+                                            </div>
+                                            <span>At Our Office</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- Location Input (for Home Service) -->
+                            <div id="location-input" class="mt-4">
+                                <div class="glassmorphism rounded-button p-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Your Location</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="ri-map-pin-line text-gray-400"></i>
+                                        </div>
+                                        <input type="text" id="address-input" placeholder="Enter your address" class="w-full pl-10 pr-4 py-2 border-none bg-white bg-opacity-70 rounded-button">
+                                    </div>
+                                    <div class="mt-3 flex items-center text-sm text-primary cursor-pointer" id="use-location-btn">
+                                        <i class="ri-gps-line mr-1"></i>
+                                        <span>Use current location</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 3: Date & Time -->
+                        <div>
+                            <h4 class="text-md font-medium text-gray-700 mb-4">Step 3: Choose Date & Time</h4>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Calendar -->
+                                <div class="glassmorphism rounded-button p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-30" id="calendar-prev">
+                                            <i class="ri-arrow-left-s-line"></i>
+                                        </button>
+                                        <h5 class="font-medium" id="calendar-month-label">June 2025</h5>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-30" id="calendar-next">
+                                            <i class="ri-arrow-right-s-line"></i>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                                        <span class="text-sm text-gray-500">Su</span>
+                                        <span class="text-sm text-gray-500">Mo</span>
+                                        <span class="text-sm text-gray-500">Tu</span>
+                                        <span class="text-sm text-gray-500">We</span>
+                                        <span class="text-sm text-gray-500">Th</span>
+                                        <span class="text-sm text-gray-500">Fr</span>
+                                        <span class="text-sm text-gray-500">Sa</span>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1" id="calendar-days"></div>
+                                </div>
+                                <!-- Time Slots -->
+                                <div class="glassmorphism rounded-button p-4">
+                                    <h5 class="font-medium mb-3">Available Time Slots</h5>
+                                    <p class="text-sm text-gray-500 mb-4" id="selected-date-label"></p>
+                                    <div class="grid grid-cols-2 gap-3" id="time-slots-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Booking Summary -->
+                    <div class="glassmorphism rounded-button p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Booking Summary</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="space-y-4">
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-car-washing-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-gray-500">Service</p>
+                                            <p class="font-medium text-gray-800" id="summary-service">Interior Detailing</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-map-pin-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-gray-500">Location</p>
+                                            <p class="font-medium text-gray-800" id="summary-location">Home Service - 25 Aba Road, Port Harcourt</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 flex items-center justify-center text-gray-500">
+                                            <i class="ri-calendar-line"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-gray-500">Date & Time</p>
+                                            <p class="font-medium text-gray-800" id="summary-datetime">June 29, 2025 • 10:00 AM - 12:00 PM</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="glassmorphism rounded-button p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Price Details</h4>
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600" id="summary-service-price-label">Interior Detailing</span>
+                                        <span class="text-gray-800" id="summary-service-price">₦25,000</span>
+                                    </div>
+                                    <div class="flex justify-between" id="summary-home-fee-row">
+                                        <span class="text-gray-600">Home Service Fee</span>
+                                        <span class="text-gray-800" id="summary-home-fee">₦2,500</span>
+                                    </div>
+                                    <div class="border-t border-gray-200 my-2"></div>
+                                    <div class="flex justify-between font-medium">
+                                        <span>Total</span>
+                                        <span class="text-primary" id="summary-total">₦27,500</span>
+                                    </div>
+                                </div>
+                                <button class="w-full py-3 bg-primary text-white rounded-button flex items-center justify-center whitespace-nowrap" id="confirm-booking-btn">
+                                    <i class="ri-check-line mr-2"></i>
+                                    Confirm Booking
+                                </button>
+                                <div id="booking-success" class="text-green-600 text-center mt-3 hidden">Booking Confirmed!</div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // --- Booking Section Logic ---
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Service selection
+                            const serviceCards = document.querySelectorAll('#service-list .service-card');
+                            let selectedService = {
+                                name: serviceCards[0].dataset.service,
+                                price: parseInt(serviceCards[0].dataset.price, 10)
+                            };
+                            serviceCards[0].classList.add('selected');
+
+                            serviceCards.forEach(card => {
+                                card.addEventListener('click', function () {
+                                    serviceCards.forEach(c => c.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    selectedService.name = this.dataset.service;
+                                    selectedService.price = parseInt(this.dataset.price, 10);
+                                    updateSummary();
+                                });
+                            });
+
+                            // Service type toggle
+                            const homeService = document.getElementById('home-service');
+                            const officeService = document.getElementById('office-service');
+                            const locationInput = document.getElementById('location-input');
+                            const addressInput = document.getElementById('address-input');
+                            const summaryLocation = document.getElementById('summary-location');
+                            const summaryHomeFeeRow = document.getElementById('summary-home-fee-row');
+                            const summaryHomeFee = document.getElementById('summary-home-fee');
+                            let homeFee = 2500;
+
+                            function updateRadioStyles() {
+                                const homeLabel = document.querySelector('label[for="home-service"]');
+                                const officeLabel = document.querySelector('label[for="office-service"]');
+                                if (homeService.checked) {
+                                    homeLabel.querySelector('span span').classList.remove('hidden');
+                                    officeLabel.querySelector('span span').classList.add('hidden');
+                                    locationInput.classList.remove('hidden');
+                                    summaryHomeFeeRow.style.display = '';
+                                } else {
+                                    homeLabel.querySelector('span span').classList.add('hidden');
+                                    officeLabel.querySelector('span span').classList.remove('hidden');
+                                    locationInput.classList.add('hidden');
+                                    summaryHomeFeeRow.style.display = 'none';
+                                }
+                                updateSummary();
+                            }
+                            homeService.addEventListener('change', updateRadioStyles);
+                            officeService.addEventListener('change', updateRadioStyles);
+
+                            // Use current location (geolocation)
+                            document.getElementById('use-location-btn').addEventListener('click', function () {
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(function (pos) {
+                                        const lat = pos.coords.latitude;
+                                        const lng = pos.coords.longitude;
+                                        // Use a free reverse geocoding API (OpenStreetMap Nominatim)
+                                        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                addressInput.value = data.display_name || `${lat}, ${lng}`;
+                                                updateSummary();
+                                            })
+                                            .catch(() => {
+                                                addressInput.value = `${lat}, ${lng}`;
+                                                updateSummary();
+                                            });
+                                    }, function () {
+                                        alert('Unable to get your location.');
+                                    });
+                                } else {
+                                    alert('Geolocation is not supported by your browser.');
+                                }
+                            });
+
+                            addressInput.addEventListener('input', updateSummary);
+
+                            // Calendar logic
+                            const calendarDaysContainer = document.getElementById('calendar-days');
+                            const calendarMonthLabel = document.getElementById('calendar-month-label');
+                            const calendarPrev = document.getElementById('calendar-prev');
+                            const calendarNext = document.getElementById('calendar-next');
+                            let calendarDate = new Date();
+                            calendarDate.setDate(1);
+
+                            let selectedDate = null;
+                            function renderCalendar() {
+                                calendarDaysContainer.innerHTML = '';
+                                const year = calendarDate.getFullYear();
+                                const month = calendarDate.getMonth();
+                                const today = new Date();
+                                calendarMonthLabel.textContent = calendarDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                                // First day of week (0=Sun)
+                                const firstDay = new Date(year, month, 1).getDay();
+                                // Days in previous month
+                                const prevMonthDays = new Date(year, month, 0).getDate();
+                                // Days in current month
+                                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                                // Fill blanks for previous month
+                                for (let i = 0; i < firstDay; i++) {
+                                    const d = prevMonthDays - firstDay + i + 1;
+                                    const div = document.createElement('div');
+                                    div.className = 'calendar-day disabled';
+                                    div.textContent = d;
+                                    calendarDaysContainer.appendChild(div);
+                                }
+                                // Fill current month days
+                                for (let d = 1; d <= daysInMonth; d++) {
+                                    const dateObj = new Date(year, month, d);
+                                    const div = document.createElement('div');
+                                    div.className = 'calendar-day';
+                                    div.textContent = d;
+                                    // Disable past days
+                                    if (
+                                        dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                                    ) {
+                                        div.classList.add('disabled');
+                                    }
+                                    // Mark today
+                                    if (
+                                        d === today.getDate() &&
+                                        month === today.getMonth() &&
+                                        year === today.getFullYear()
+                                    ) {
+                                        div.classList.add('today');
+                                    }
+                                    // Mark selected
+                                    if (
+                                        selectedDate &&
+                                        dateObj.getFullYear() === selectedDate.getFullYear() &&
+                                        dateObj.getMonth() === selectedDate.getMonth() &&
+                                        dateObj.getDate() === selectedDate.getDate()
+                                    ) {
+                                        div.classList.add('selected');
+                                    }
+                                    // Click handler
+                                    if (!div.classList.contains('disabled')) {
+                                        div.style.cursor = 'pointer';
+                                        div.addEventListener('click', function () {
+                                            selectedDate = new Date(year, month, d);
+                                            renderCalendar();
+                                            updateSummary();
+                                            renderTimeSlots();
+                                        });
+                                    }
+                                    calendarDaysContainer.appendChild(div);
+                                }
+                                // Fill blanks for next month
+                                const totalCells = firstDay + daysInMonth;
+                                for (let i = 0; i < (7 - (totalCells % 7)) % 7; i++) {
+                                    const div = document.createElement('div');
+                                    div.className = 'calendar-day disabled';
+                                    div.textContent = i + 1;
+                                    calendarDaysContainer.appendChild(div);
+                                }
+                            }
+                            calendarPrev.addEventListener('click', function () {
+                                calendarDate.setMonth(calendarDate.getMonth() - 1);
+                                renderCalendar();
+                            });
+                            calendarNext.addEventListener('click', function () {
+                                calendarDate.setMonth(calendarDate.getMonth() + 1);
+                                renderCalendar();
+                            });
+
+                            // Time slots logic
+                            const timeSlotsList = document.getElementById('time-slots-list');
+                            const selectedDateLabel = document.getElementById('selected-date-label');
+                            let selectedTimeSlot = null;
+                            // Example time slots (could be dynamic)
+                            const allTimeSlots = [
+                                { label: '8:00 AM - 10:00 AM', available: true },
+                                { label: '10:00 AM - 12:00 PM', available: true },
+                                { label: '12:00 PM - 2:00 PM', available: true },
+                                { label: '2:00 PM - 4:00 PM', available: true },
+                                { label: '4:00 PM - 6:00 PM', available: true }
+                            ];
+                            function renderTimeSlots() {
+                                timeSlotsList.innerHTML = '';
+                                if (!selectedDate) {
+                                    selectedDateLabel.textContent = 'Please select a date';
+                                    return;
+                                }
+                                selectedDateLabel.textContent = selectedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                                // Example: block some slots if date is today and time has passed
+                                const now = new Date();
+                                let slots = allTimeSlots.map(slot => ({ ...slot }));
+                                if (
+                                    selectedDate.getFullYear() === now.getFullYear() &&
+                                    selectedDate.getMonth() === now.getMonth() &&
+                                    selectedDate.getDate() === now.getDate()
+                                ) {
+                                    // Block slots that have already passed
+                                    const hour = now.getHours();
+                                    slots = slots.map(slot => {
+                                        if (slot.label.startsWith('8:00') && hour >= 10) return { ...slot, available: false };
+                                        if (slot.label.startsWith('10:00') && hour >= 12) return { ...slot, available: false };
+                                        if (slot.label.startsWith('12:00') && hour >= 14) return { ...slot, available: false };
+                                        if (slot.label.startsWith('2:00') && hour >= 16) return { ...slot, available: false };
+                                        if (slot.label.startsWith('4:00') && hour >= 18) return { ...slot, available: false };
+                                        return slot;
+                                    });
+                                }
+                                slots.forEach(slot => {
+                                    const div = document.createElement('div');
+                                    div.className = 'time-slot rounded-button p-3 text-center text-sm';
+                                    div.textContent = slot.label;
+                                    if (!slot.available) {
+                                        div.classList.add('unavailable');
+                                    } else {
+                                        div.classList.add('available');
+                                        div.style.cursor = 'pointer';
+                                        div.addEventListener('click', function () {
+                                            selectedTimeSlot = slot.label;
+                                            renderTimeSlots();
+                                            updateSummary();
+                                        });
+                                    }
+                                    if (selectedTimeSlot === slot.label) {
+                                        div.classList.add('selected');
+                                    }
+                                    timeSlotsList.appendChild(div);
+                                });
+                            }
+
+                            // Booking summary
+                            const summaryService = document.getElementById('summary-service');
+                            const summaryServicePriceLabel = document.getElementById('summary-service-price-label');
+                            const summaryServicePrice = document.getElementById('summary-service-price');
+                            const summaryDatetime = document.getElementById('summary-datetime');
+                            const summaryTotal = document.getElementById('summary-total');
+                            function updateSummary() {
+                                summaryService.textContent = selectedService.name;
+                                summaryServicePriceLabel.textContent = selectedService.name;
+                                summaryServicePrice.textContent = '₦' + selectedService.price.toLocaleString();
+                                let locationText = '';
+                                if (homeService.checked) {
+                                    locationText = 'Home Service - ' + (addressInput.value || 'Your Address');
+                                    summaryHomeFee.textContent = '₦' + homeFee.toLocaleString();
+                                } else {
+                                    locationText = 'At Our Office - WhypeMasters Office';
+                                }
+                                summaryLocation.textContent = locationText;
+                                let dateText = selectedDate
+                                    ? selectedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+                                    : 'Select Date';
+                                let timeText = selectedTimeSlot || 'Select Time';
+                                summaryDatetime.textContent = dateText + ' • ' + timeText;
+                                let total = selectedService.price + (homeService.checked ? homeFee : 0);
+                                summaryTotal.textContent = '₦' + total.toLocaleString();
+                            }
+
+                            // Confirm booking
+                            document.getElementById('confirm-booking-btn').addEventListener('click', function () {
+                                // Validate
+                                if (!selectedService.name) {
+                                    alert('Please select a service.');
+                                    return;
+                                }
+                                if (homeService.checked && !addressInput.value) {
+                                    alert('Please enter your address.');
+                                    return;
+                                }
+                                if (!selectedDate) {
+                                    alert('Please select a date.');
+                                    return;
+                                }
+                                if (!selectedTimeSlot) {
+                                    alert('Please select a time slot.');
+                                    return;
+                                }
+                                // Simulate booking
+                                this.disabled = true;
+                                document.getElementById('booking-success').classList.remove('hidden');
+                                setTimeout(() => {
+                                    this.disabled = false;
+                                    document.getElementById('booking-success').classList.add('hidden');
+                                }, 2500);
+                            });
+
+                            // Initial state
+                            // Set default address for demo
+                            addressInput.value = '25 Aba Road, Port Harcourt';
+                            selectedDate = new Date();
+                            selectedDate.setDate(selectedDate.getDate() + 1);
+                            selectedTimeSlot = allTimeSlots[1].label;
+                            renderCalendar();
+                            renderTimeSlots();
+                            updateSummary();
+                        });
+                    </script>
+                </section>
+                
+                <!-- Appointments Section -->
+                <section id="appointments-section" class="content-section hidden">
+                    <div class="glassmorphism rounded-button p-6 mb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">My Appointments</h3>
+                            <div class="flex">
+                                <button id="upcoming-tab" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-l-button flex items-center whitespace-nowrap font-medium">
+                                    <i class="ri-calendar-line mr-2"></i>
+                                    Upcoming
+                                </button>
+                                <button id="past-tab" class="px-4 py-2 bg-white bg-opacity-50 border border-gray-200 text-gray-500 rounded-r-button flex items-center whitespace-nowrap">
+                                    <i class="ri-history-line mr-2"></i>
+                                    Past
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Upcoming Appointments -->
+                        <div id="upcoming-appointments-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full min-w-0" style="min-height: 260px;"></div>
+                        <!-- Past Appointments -->
+                        <div id="past-appointments-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full min-w-0 hidden" style="min-height: 260px;"></div>
+                    </div>
+
+                    <!-- Reschedule Modal -->
+                    <div id="appointments-reschedule-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                        <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                            <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="closeAppointmentsModal('appointments-reschedule-modal')">
+                                <i class="ri-close-line text-2xl"></i>
+                            </button>
+                            <h4 class="text-lg font-semibold mb-4 text-gray-800">Reschedule Appointment</h4>
+                            <form id="appointments-reschedule-form">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select New Date</label>
+                                    <input type="date" id="reschedule-date" class="w-full px-4 py-2 border border-gray-200 rounded-button" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select New Time</label>
+                                    <select id="reschedule-time" class="w-full px-4 py-2 border border-gray-200 rounded-button" required>
+                                        <option>8:00 AM - 10:00 AM</option>
+                                        <option>10:00 AM - 12:00 PM</option>
+                                        <option>12:00 PM - 2:00 PM</option>
+                                        <option>2:00 PM - 4:00 PM</option>
+                                        <option>4:00 PM - 6:00 PM</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-primary text-white rounded-button">
+                                    Confirm Reschedule
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Cancel Modal -->
+                    <div id="appointments-cancel-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                        <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                            <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="closeAppointmentsModal('appointments-cancel-modal')">
+                                <i class="ri-close-line text-2xl"></i>
+                            </button>
+                            <h4 class="text-lg font-semibold mb-4 text-gray-800">Cancel Appointment</h4>
+                            <p class="mb-6 text-gray-700">Are you sure you want to cancel this appointment?</p>
+                            <div class="flex gap-3">
+                                <button type="button" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-button" onclick="closeAppointmentsModal('appointments-cancel-modal')">
+                                    No, Keep
+                                </button>
+                                <button type="button" id="confirm-cancel-btn" class="flex-1 py-2 bg-red-500 text-white rounded-button">
+                                    Yes, Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // Appointment data (simulate backend)
+                        const appointmentsData = {
+                            upcoming: [
+                                {
+                                    id: 1,
+                                    service: "Interior Detailing",
+                                    icon: "ri-steering-2-line",
+                                    duration: "2 hours service",
+                                    status: "Confirmed",
+                                    statusClass: "bg-blue-100 text-primary",
+                                    date: "June 29, 2025",
+                                    time: "10:00 AM - 12:00 PM",
+                                    location: "25 Aba Road, Port Harcourt",
+                                    locationIcon: "ri-map-pin-line",
+                                    canReschedule: true,
+                                    canCancel: true,
+                                    type: "home"
+                                },
+                                {
+                                    id: 2,
+                                    service: "Exterior Wash & Wax",
+                                    icon: "ri-car-washing-line",
+                                    duration: "2 hours service",
+                                    status: "Confirmed",
+                                    statusClass: "bg-blue-100 text-primary",
+                                    date: "July 5, 2025",
+                                    time: "2:00 PM - 4:00 PM",
+                                    location: "WhypeMasters Office",
+                                    locationIcon: "ri-store-2-line",
+                                    canReschedule: true,
+                                    canCancel: true,
+                                    type: "office"
+                                },
+                                {
+                                    id: 3,
+                                    service: "Engine Bay Cleaning",
+                                    icon: "ri-tools-line",
+                                    duration: "1 hour service",
+                                    status: "Pending",
+                                    statusClass: "bg-yellow-100 text-yellow-600",
+                                    date: "July 10, 2025",
+                                    time: "4:00 PM - 5:00 PM",
+                                    location: "15 Ikwerre Road, Port Harcourt",
+                                    locationIcon: "ri-map-pin-line",
+                                    canReschedule: true,
+                                    canCancel: true,
+                                    type: "home"
+                                }
+                            ],
+                            past: [
+                                {
+                                    id: 4,
+                                    service: "Exterior Wash & Wax",
+                                    icon: "ri-car-washing-line",
+                                    duration: "2 hours service",
+                                    status: "Completed",
+                                    statusClass: "bg-green-100 text-secondary",
+                                    date: "June 20, 2025",
+                                    time: "2:00 PM - 4:00 PM",
+                                    canReview: true
+                                }
+                            ]
+                        };
+
+                        let currentTab = "upcoming";
+                        let rescheduleAppointmentId = null;
+                        let cancelAppointmentId = null;
+
+                        function renderAppointments() {
+                            // Upcoming
+                            const upcomingList = document.getElementById('upcoming-appointments-list');
+                            upcomingList.innerHTML = '';
+                            appointmentsData.upcoming.forEach(app => {
+                                const card = document.createElement('div');
+                                card.className = "appointment-card glassmorphism rounded-button p-5 w-full min-w-0";
+                                card.innerHTML = `
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">
+                                                <i class="${app.icon}"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h4 class="font-medium text-gray-800">${app.service}</h4>
+                                                <p class="text-sm text-gray-500">${app.duration}</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 ${app.statusClass} text-sm rounded-full">${app.status}</span>
+                                    </div>
+                                    <div class="space-y-3 mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+                                                <i class="ri-calendar-line"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 ml-2">${app.date}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+                                                <i class="ri-time-line"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 ml-2">${app.time}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+                                                <i class="${app.locationIcon}"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 ml-2">${app.location}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="flex-1 py-2 bg-primary text-white rounded-button flex items-center justify-center whitespace-nowrap" data-action="reschedule" data-id="${app.id}">
+                                            <i class="ri-calendar-line mr-1"></i>
+                                            Reschedule
+                                        </button>
+                                        <button class="flex-1 py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center justify-center whitespace-nowrap" data-action="cancel" data-id="${app.id}">
+                                            <i class="ri-close-line mr-1"></i>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                `;
+                                upcomingList.appendChild(card);
+                            });
+
+                            // Past
+                            const pastList = document.getElementById('past-appointments-list');
+                            pastList.innerHTML = '';
+                            appointmentsData.past.forEach(app => {
+                                const card = document.createElement('div');
+                                card.className = "appointment-card glassmorphism rounded-button p-5";
+                                card.innerHTML = `
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-secondary">
+                                                <i class="${app.icon}"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h4 class="font-medium text-gray-800">${app.service}</h4>
+                                                <p class="text-sm text-gray-500">${app.duration}</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 ${app.statusClass} text-sm rounded-full">${app.status}</span>
+                                    </div>
+                                    <div class="space-y-3 mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+                                                <i class="ri-calendar-line"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 ml-2">${app.date}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-6 h-6 flex items-center justify-center text-gray-500">
+                                                <i class="ri-time-line"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 ml-2">${app.time}</span>
+                                        </div>
+                                    </div>
+                                    <button class="w-full py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center justify-center whitespace-nowrap" data-action="review" data-id="${app.id}">
+                                        <i class="ri-star-line mr-2"></i>
+                                        Leave a Review
+                                    </button>
+                                `;
+                                pastList.appendChild(card);
+                            });
+                        }
+
+                        function switchAppointmentsTab(tab) {
+                            currentTab = tab;
+                            document.getElementById('upcoming-tab').classList.toggle('font-medium', tab === 'upcoming');
+                            document.getElementById('upcoming-tab').classList.toggle('text-gray-700', tab === 'upcoming');
+                            document.getElementById('upcoming-tab').classList.toggle('bg-white', tab === 'upcoming');
+                            document.getElementById('upcoming-tab').classList.toggle('bg-opacity-50', tab !== 'upcoming');
+                            document.getElementById('upcoming-tab').classList.toggle('text-gray-500', tab !== 'upcoming');
+
+                            document.getElementById('past-tab').classList.toggle('font-medium', tab === 'past');
+                            document.getElementById('past-tab').classList.toggle('text-gray-700', tab === 'past');
+                            document.getElementById('past-tab').classList.toggle('bg-white', tab === 'past');
+                            document.getElementById('past-tab').classList.toggle('bg-opacity-50', tab !== 'past');
+                            document.getElementById('past-tab').classList.toggle('text-gray-500', tab !== 'past');
+
+                            document.getElementById('upcoming-appointments-list').classList.toggle('hidden', tab !== 'upcoming');
+                            document.getElementById('past-appointments-list').classList.toggle('hidden', tab !== 'past');
+                        }
+
+                        function closeAppointmentsModal(id) {
+                            document.getElementById(id).classList.add('hidden');
+                        }
+
+                        function openAppointmentsModal(id) {
+                            document.getElementById(id).classList.remove('hidden');
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function () {
+                            renderAppointments();
+                            switchAppointmentsTab('upcoming');
+
+                            // Tab switching
+                            document.getElementById('upcoming-tab').addEventListener('click', function () {
+                                switchAppointmentsTab('upcoming');
+                            });
+                            document.getElementById('past-tab').addEventListener('click', function () {
+                                switchAppointmentsTab('past');
+                            });
+
+                            // Delegate actions for reschedule/cancel/review
+                            document.getElementById('upcoming-appointments-list').addEventListener('click', function (e) {
+                                const btn = e.target.closest('button[data-action]');
+                                if (!btn) return;
+                                const action = btn.getAttribute('data-action');
+                                const id = parseInt(btn.getAttribute('data-id'), 10);
+                                if (action === 'reschedule') {
+                                    rescheduleAppointmentId = id;
+                                    openAppointmentsModal('appointments-reschedule-modal');
+                                } else if (action === 'cancel') {
+                                    cancelAppointmentId = id;
+                                    openAppointmentsModal('appointments-cancel-modal');
+                                }
+                            });
+
+                            document.getElementById('past-appointments-list').addEventListener('click', function (e) {
+                                const btn = e.target.closest('button[data-action="review"]');
+                                if (!btn) return;
+                                // For demo, just switch to review section
+                                document.querySelector('.sidebar-item[data-target="review"]').click();
+                            });
+
+                            // Reschedule form
+                            document.getElementById('appointments-reschedule-form').addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                const date = document.getElementById('reschedule-date').value;
+                                const time = document.getElementById('reschedule-time').value;
+                                if (rescheduleAppointmentId) {
+                                    const app = appointmentsData.upcoming.find(a => a.id === rescheduleAppointmentId);
+                                    if (app) {
+                                        app.date = new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                                        app.time = time;
+                                        app.status = "Confirmed";
+                                        app.statusClass = "bg-blue-100 text-primary";
+                                    }
+                                    renderAppointments();
+                                    closeAppointmentsModal('appointments-reschedule-modal');
+                                }
+                            });
+
+                            // Cancel appointment
+                            document.getElementById('confirm-cancel-btn').addEventListener('click', function () {
+                                if (cancelAppointmentId) {
+                                    // Remove from upcoming, add to past as cancelled (for demo, just remove)
+                                    appointmentsData.upcoming = appointmentsData.upcoming.filter(a => a.id !== cancelAppointmentId);
+                                    renderAppointments();
+                                    closeAppointmentsModal('appointments-cancel-modal');
+                                }
+                            });
+
+                            // Modal background click to close
+                            ['appointments-reschedule-modal', 'appointments-cancel-modal'].forEach(function (id) {
+                                const modal = document.getElementById(id);
+                                modal && modal.addEventListener('click', function (e) {
+                                    if (e.target === modal) closeAppointmentsModal(id);
+                                });
+                            });
+                        });
+                    </script>
+                </section>
+                
+                <!-- Review Section -->
+                <section id="review-section" class="content-section hidden">
+                    <div class="glassmorphism rounded-button p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Submit a Review</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <form id="review-form" autocomplete="off">
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Service</label>
+                                        <div class="relative">
+                                            <select id="review-service" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button appearance-none pr-8" required>
+                                                <option value="Exterior Wash & Wax (June 20, 2025)">Exterior Wash & Wax (June 20, 2025)</option>
+                                                <option value="Interior Detailing (May 15, 2025)">Interior Detailing (May 15, 2025)</option>
+                                                <option value="Engine Bay Cleaning (April 30, 2025)">Engine Bay Cleaning (April 30, 2025)</option>
+                                            </select>
+                                            <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                <i class="ri-arrow-down-s-line"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Rate Your Experience</label>
+                                        <div class="star-rating flex items-center" id="review-stars">
+                                            <input type="radio" id="star5" name="rating" value="5" checked>
+                                            <label for="star5" class="w-8 h-8 flex items-center justify-center text-xl"><i class="ri-star-fill"></i></label>
+                                            <input type="radio" id="star4" name="rating" value="4">
+                                            <label for="star4" class="w-8 h-8 flex items-center justify-center text-xl"><i class="ri-star-fill"></i></label>
+                                            <input type="radio" id="star3" name="rating" value="3">
+                                            <label for="star3" class="w-8 h-8 flex items-center justify-center text-xl"><i class="ri-star-fill"></i></label>
+                                            <input type="radio" id="star2" name="rating" value="2">
+                                            <label for="star2" class="w-8 h-8 flex items-center justify-center text-xl"><i class="ri-star-fill"></i></label>
+                                            <input type="radio" id="star1" name="rating" value="1">
+                                            <label for="star1" class="w-8 h-8 flex items-center justify-center text-xl"><i class="ri-star-fill"></i></label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                                        <textarea id="review-message" rows="5" placeholder="Share your experience..." class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button resize-none" required></textarea>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Photos (Optional)</label>
+                                        <div id="photo-upload-area" class="border-2 border-dashed border-gray-300 rounded-button p-4 text-center cursor-pointer relative">
+                                            <div class="w-12 h-12 mx-auto rounded-full bg-blue-100 flex items-center justify-center text-primary mb-2">
+                                                <i class="ri-image-add-line ri-lg"></i>
+                                            </div>
+                                            <p class="text-sm text-gray-500">Drag & drop photos here or click to browse</p>
+                                            <input id="review-photos" type="file" class="absolute inset-0 opacity-0 cursor-pointer" multiple accept="image/*">
+                                            <div id="photo-preview" class="flex gap-2 mt-3 flex-wrap"></div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full py-3 bg-primary text-white rounded-button flex items-center justify-center whitespace-nowrap">
+                                        <i class="ri-send-plane-line mr-2"></i>
+                                        Submit Review
+                                    </button>
+                                    <div id="review-success" class="text-green-600 text-center mt-3 hidden">Review submitted!</div>
+                                </form>
+                            </div>
+                            <div class="glassmorphism rounded-button p-5">
+                                <h4 class="font-medium text-gray-800 mb-4">Preview</h4>
+                                <div class="bg-white bg-opacity-50 rounded-button p-4" id="review-preview">
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                                            <span>JD</span>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="font-medium text-gray-800" id="preview-name">John Doe</p>
+                                            <div class="flex text-yellow-400" id="preview-stars">
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-auto text-sm text-gray-500" id="preview-date">Today</div>
+                                    </div>
+                                    <p class="text-gray-700 mb-4" id="preview-message">
+                                        The exterior wash and wax service was exceptional! My car looks brand new again. The team was professional and thorough, paying attention to every detail. Highly recommend WhypeMasters to anyone looking for quality car detailing in Port Harcourt.
+                                    </p>
+                                    <div class="flex gap-2 overflow-x-auto pb-2" id="preview-photos"></div>
+                                </div>
+                                <div class="mt-6">
+                                    <h4 class="font-medium text-gray-800 mb-3">Recent Reviews</h4>
+                                    <div class="space-y-4" id="recent-reviews">
+                                        <div class="bg-white bg-opacity-50 rounded-button p-3">
+                                            <div class="flex items-center mb-2">
+                                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                    <span>OA</span>
+                                                </div>
+                                                <div class="ml-2">
+                                                    <p class="font-medium text-gray-800 text-sm">Oluwaseun Adegoke</p>
+                                                    <div class="flex text-yellow-400 text-xs">
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-auto text-xs text-gray-500">
+                                                    2 days ago
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-700">Great service! My car's interior looks and smells amazing.</p>
+                                        </div>
+                                        <div class="bg-white bg-opacity-50 rounded-button p-3">
+                                            <div class="flex items-center mb-2">
+                                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                    <span>CI</span>
+                                                </div>
+                                                <div class="ml-2">
+                                                    <p class="font-medium text-gray-800 text-sm">Chioma Ibe</p>
+                                                    <div class="flex text-yellow-400 text-xs">
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-fill"></i>
+                                                        <i class="ri-star-line"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-auto text-xs text-gray-500">
+                                                    1 week ago
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-700">Professional team and good results. Would recommend.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        // Review section logic
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Elements
+                            const form = document.getElementById('review-form');
+                            const serviceSelect = document.getElementById('review-service');
+                            const starInputs = form.querySelectorAll('input[name="rating"]');
+                            const messageInput = document.getElementById('review-message');
+                            const photoInput = document.getElementById('review-photos');
+                            const photoPreview = document.getElementById('photo-preview');
+                            const previewStars = document.getElementById('preview-stars');
+                            const previewMessage = document.getElementById('preview-message');
+                            const previewDate = document.getElementById('preview-date');
+                            const previewPhotos = document.getElementById('preview-photos');
+                            const previewName = document.getElementById('preview-name');
+                            const reviewSuccess = document.getElementById('review-success');
+                            const recentReviews = document.getElementById('recent-reviews');
+                            let uploadedImages = [];
+
+                            // Helper: get initials
+                            function getInitials(name) {
+                                return name.split(' ').map(n => n[0]).join('').toUpperCase();
+                            }
+
+                            // Preview update
+                            function updatePreview() {
+                                // Stars
+                                let rating = 5;
+                                starInputs.forEach(input => { if (input.checked) rating = parseInt(input.value, 10); });
+                                previewStars.innerHTML = '';
+                                for (let i = 1; i <= 5; i++) {
+                                    previewStars.innerHTML += `<i class="ri-star-${i <= rating ? 'fill' : 'line'}"></i>`;
+                                }
+                                // Message
+                                previewMessage.textContent = messageInput.value || "Share your experience...";
+                                // Date
+                                previewDate.textContent = "Today";
+                                // Name
+                                previewName.textContent = "John Doe";
+                                // Photos
+                                previewPhotos.innerHTML = '';
+                                uploadedImages.forEach(url => {
+                                    const img = document.createElement('img');
+                                    img.src = url;
+                                    img.className = "w-20 h-20 rounded-button object-cover flex-shrink-0";
+                                    previewPhotos.appendChild(img);
+                                });
+                            }
+
+                            // Star rating hover/selection
+                            const starLabels = form.querySelectorAll('.star-rating label');
+                            starLabels.forEach((label, idx) => {
+                                label.addEventListener('mouseover', function () {
+                                    for (let i = 0; i <= idx; i++) starLabels[i].style.color = '#FFB340';
+                                    for (let i = idx + 1; i < starLabels.length; i++) starLabels[i].style.color = '#D1D5DB';
+                                });
+                                label.addEventListener('mouseout', function () { resetStars(); });
+                                label.addEventListener('click', function () {
+                                    starInputs[idx].checked = true;
+                                    resetStars();
+                                    updatePreview();
+                                });
+                            });
+                            function resetStars() {
+                                let checkedIdx = -1;
+                                starInputs.forEach((input, i) => { if (input.checked) checkedIdx = i; });
+                                starLabels.forEach((label, i) => {
+                                    label.style.color = i <= checkedIdx ? '#FFB340' : '#D1D5DB';
+                                });
+                            }
+                            resetStars();
+
+                            // Update preview on input
+                            serviceSelect.addEventListener('change', updatePreview);
+                            messageInput.addEventListener('input', updatePreview);
+                            starInputs.forEach(input => input.addEventListener('change', updatePreview));
+
+                            // Photo upload/preview
+                            function handleFiles(files) {
+                                uploadedImages = [];
+                                photoPreview.innerHTML = '';
+                                Array.from(files).forEach(file => {
+                                    if (!file.type.startsWith('image/')) return;
+                                    const reader = new FileReader();
+                                    reader.onload = function (e) {
+                                        uploadedImages.push(e.target.result);
+                                        const img = document.createElement('img');
+                                        img.src = e.target.result;
+                                        img.className = "w-16 h-16 rounded-button object-cover flex-shrink-0";
+                                        photoPreview.appendChild(img);
+                                        updatePreview();
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
+                            }
+                            photoInput.addEventListener('change', function (e) {
+                                handleFiles(e.target.files);
+                            });
+                            // Drag & drop
+                            const uploadArea = document.getElementById('photo-upload-area');
+                            uploadArea.addEventListener('dragover', function (e) {
+                                e.preventDefault();
+                                uploadArea.classList.add('bg-blue-50');
+                            });
+                            uploadArea.addEventListener('dragleave', function (e) {
+                                e.preventDefault();
+                                uploadArea.classList.remove('bg-blue-50');
+                            });
+                            uploadArea.addEventListener('drop', function (e) {
+                                e.preventDefault();
+                                uploadArea.classList.remove('bg-blue-50');
+                                if (e.dataTransfer.files.length) {
+                                    photoInput.files = e.dataTransfer.files;
+                                    handleFiles(e.dataTransfer.files);
+                                }
+                            });
+
+                            // Form submit
+                            form.addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                // Get values
+                                const service = serviceSelect.value;
+                                let rating = 5;
+                                starInputs.forEach(input => { if (input.checked) rating = parseInt(input.value, 10); });
+                                const message = messageInput.value;
+                                const photos = uploadedImages.slice();
+
+                                // Add to recent reviews (top)
+                                const initials = getInitials("John Doe");
+                                const now = new Date();
+                                const reviewDiv = document.createElement('div');
+                                reviewDiv.className = "bg-white bg-opacity-50 rounded-button p-3";
+                                reviewDiv.innerHTML = `
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                            <span>${initials}</span>
+                                        </div>
+                                        <div class="ml-2">
+                                            <p class="font-medium text-gray-800 text-sm">John Doe</p>
+                                            <div class="flex text-yellow-400 text-xs">
+                                                ${[...Array(5)].map((_, i) => `<i class="ri-star-${i < rating ? 'fill' : 'line'}"></i>`).join('')}
+                                            </div>
+                                        </div>
+                                        <div class="ml-auto text-xs text-gray-500">
+                                            just now
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-700">${message}</p>
+                                    ${photos.length ? `<div class="flex gap-2 mt-2">${photos.map(url => `<img src="${url}" class="w-12 h-12 rounded-button object-cover flex-shrink-0">`).join('')}</div>` : ''}
+                                `;
+                                recentReviews.prepend(reviewDiv);
+
+                                // Show success
+                                reviewSuccess.classList.remove('hidden');
+                                setTimeout(() => reviewSuccess.classList.add('hidden'), 2000);
+
+                                // Reset form
+                                form.reset();
+                                uploadedImages = [];
+                                photoPreview.innerHTML = '';
+                                resetStars();
+                                updatePreview();
+                            });
+
+                            // Initial preview
+                            updatePreview();
+                        });
+                        </script>
+                    </div>
+                </section>
+                
+                <!-- Settings Section -->
+                <section id="settings-section" class="content-section hidden">
+                    <div class="glassmorphism rounded-button p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Account Settings</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div class="lg:col-span-2">
+                                <div class="space-y-6">
+                                    <!-- Personal Information -->
+                                    <form id="personal-info-form">
+                                        <h4 class="text-md font-medium text-gray-700 mb-4">Personal Information</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                                <input type="text" id="settings-fullname" value="John Doe" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                                <input type="email" id="settings-email" value="johndoe@example.com" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                                <input type="tel" id="settings-phone" value="+234 803 456 7890" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Default Address</label>
+                                                <input type="text" id="settings-address" value="25 Aba Road, Port Harcourt" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-button flex items-center whitespace-nowrap">
+                                            <i class="ri-save-line mr-2"></i>
+                                            Save Changes
+                                        </button>
+                                        <div id="personal-info-success" class="text-green-600 mt-2 hidden">Changes saved!</div>
+                                    </form>
+                                    <!-- Vehicle Information -->
+                                    <form id="vehicle-info-form" class="pt-6 border-t border-gray-200">
+                                        <h4 class="text-md font-medium text-gray-700 mb-4">Vehicle Information</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Make</label>
+                                                <input type="text" id="settings-make" value="Toyota" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Model</label>
+                                                <input type="text" id="settings-model" value="Camry" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                                                <input type="number" id="settings-year" value="2022" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" min="1900" max="2099" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                                <input type="text" id="settings-color" value="Pearl White" class="w-full px-4 py-2 bg-white bg-opacity-70 border border-gray-200 rounded-button" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-button flex items-center whitespace-nowrap">
+                                            <i class="ri-save-line mr-2"></i>
+                                            Save Changes
+                                        </button>
+                                        <div id="vehicle-info-success" class="text-green-600 mt-2 hidden">Vehicle info saved!</div>
+                                    </form>
+                                    <!-- Preferences -->
+                                    <form id="preferences-form" class="pt-6 border-t border-gray-200">
+                                        <h4 class="text-md font-medium text-gray-700 mb-4">Preferences</h4>
+                                        <div class="space-y-4 mb-4">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="font-medium text-gray-800">Default to Home Service</p>
+                                                    <p class="text-sm text-gray-500">Always select home service by default when booking</p>
+                                                </div>
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="checkbox" id="pref-home-service" class="hidden" checked>
+                                                    <div class="toggle-switch"></div>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="font-medium text-gray-800">Email Notifications</p>
+                                                    <p class="text-sm text-gray-500">Receive booking confirmations and reminders</p>
+                                                </div>
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="checkbox" id="pref-email" class="hidden" checked>
+                                                    <div class="toggle-switch"></div>
+                                                </label>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="font-medium text-gray-800">SMS Notifications</p>
+                                                    <p class="text-sm text-gray-500">Receive text message alerts</p>
+                                                </div>
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="checkbox" id="pref-sms" class="hidden">
+                                                    <div class="toggle-switch"></div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-button flex items-center whitespace-nowrap">
+                                            <i class="ri-save-line mr-2"></i>
+                                            Save Preferences
+                                        </button>
+                                        <div id="preferences-success" class="text-green-600 mt-2 hidden">Preferences saved!</div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="glassmorphism rounded-button p-5 mb-6">
+                                    <div class="text-center mb-4">
+                                        <div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-2xl mx-auto mb-3 relative overflow-hidden" id="profile-photo-area">
+                                            <span id="profile-initials">JD</span>
+                                            <img id="profile-photo-img" src="" alt="Profile Photo" class="hidden w-20 h-20 rounded-full object-cover">
+                                        </div>
+                                        <h4 class="font-medium text-gray-800" id="profile-name">John Doe</h4>
+                                        <p class="text-sm text-gray-500">Member since May 2025</p>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Membership</span>
+                                            <span class="text-sm font-medium text-primary">Premium</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Total Bookings</span>
+                                            <span class="text-sm font-medium">15</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600">Loyalty Points</span>
+                                            <span class="text-sm font-medium">750</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-gray-200">
+                                        <button type="button" class="w-full py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center justify-center whitespace-nowrap" id="change-photo-btn">
+                                            <i class="ri-upload-2-line mr-2"></i>
+                                            Change Profile Photo
+                                        </button>
+                                        <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
+                                    </div>
+                                </div>
+                                <div class="glassmorphism rounded-button p-5">
+                                    <h4 class="font-medium text-gray-800 mb-4">Security</h4>
+                                    <div class="space-y-4">
+                                        <button type="button" class="w-full py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center justify-center whitespace-nowrap" id="change-password-btn">
+                                            <i class="ri-lock-password-line mr-2"></i>
+                                            Change Password
+                                        </button>
+                                        <button type="button" class="w-full py-2 bg-white border border-gray-200 text-gray-700 rounded-button flex items-center justify-center whitespace-nowrap" id="2fa-btn">
+                                            <i class="ri-shield-check-line mr-2"></i>
+                                            Two-Factor Authentication
+                                        </button>
+                                        <button type="button" class="w-full py-2 bg-red-50 text-red-600 rounded-button flex items-center justify-center whitespace-nowrap" id="delete-account-btn">
+                                            <i class="ri-delete-bin-line mr-2"></i>
+                                            Delete Account
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modals -->
+                    <div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                        <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                            <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="document.getElementById('password-modal').classList.add('hidden')">
+                                <i class="ri-close-line text-2xl"></i>
+                            </button>
+                            <h4 class="text-lg font-semibold mb-4 text-gray-800">Change Password</h4>
+                            <form id="change-password-form">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input type="password" class="w-full px-4 py-2 border border-gray-200 rounded-button" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input type="password" class="w-full px-4 py-2 border border-gray-200 rounded-button" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input type="password" class="w-full px-4 py-2 border border-gray-200 rounded-button" required>
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-primary text-white rounded-button">
+                                    Update Password
+                                </button>
+                                <div id="password-success" class="text-green-600 text-center mt-3 hidden">Password updated!</div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="2fa-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                        <div class="bg-white rounded-button p-6 w-full max-w-md shadow-lg relative">
+                            <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-700" onclick="document.getElementById('2fa-modal').classList.add('hidden')">
+                                <i class="ri-close-line text-2xl"></i>
+                            </button>
+                            <h4 class="text-lg font-semibold mb-4 text-gray-800">Two-Factor Authentication</h4>
+                            <p class="mb-4 text-gray-700">For demo, 2FA is simulated. Toggle below to enable/disable.</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-medium text-gray-800">Enable 2FA</span>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="2fa-toggle" class="hidden">
+                                    <div class="toggle-switch"></div>
+                                </label>
+                            </div>
+                            <div id="2fa-status" class="text-green-600 text-center mb-2 hidden">2FA enabled!</div>
+                            <button class="w-full py-2 bg-primary text-white rounded-button" onclick="document.getElementById('2fa-modal').classList.add('hidden')">
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Custom Delete Account Modal -->
+                    <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+                        <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 modal-content">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-800">Delete Account</h3>
+                                <button class="modal-close text-gray-400 hover:text-gray-500" type="button">
+                                    <i class="ri-close-line ri-lg"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                                        <i class="ri-delete-bin-line ri-lg"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-lg font-medium text-gray-800">
+                                            Are you sure you want to delete your account?
+                                        </h4>
+                                        <p class="text-sm text-gray-500">
+                                            This action cannot be undone. All your data, bookings, and loyalty points will be permanently removed.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="ri-error-warning-line text-yellow-600"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-yellow-800">Warning</h3>
+                                            <div class="mt-2 text-sm text-yellow-700">
+                                                <p>
+                                                    Deleting your account is permanent and cannot be reversed. If you have active bookings, they will be cancelled.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="delete-confirmation" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Type "DELETE" to confirm
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="delete-confirmation"
+                                        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                        placeholder="DELETE"
+                                    />
+                                </div>
+                                <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                                    <button
+                                        class="px-4 py-2 border border-gray-200 text-gray-600 rounded-button whitespace-nowrap hover:bg-gray-50 modal-close"
+                                        type="button"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        id="confirm-delete-btn"
+                                        class="px-4 py-2 bg-red-600 text-white rounded-button whitespace-nowrap"
+                                        type="button"
+                                        disabled
+                                    >
+                                        Delete Account
+                                    </button>
+                                </div>
+                                <div id="delete-success" class="text-green-600 text-center mt-3 hidden">Account deleted (demo only).</div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // Settings logic
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Profile info update
+                            const profileName = document.getElementById('profile-name');
+                            const profileInitials = document.getElementById('profile-initials');
+                            const fullnameInput = document.getElementById('settings-fullname');
+                            const emailInput = document.getElementById('settings-email');
+                            const phoneInput = document.getElementById('settings-phone');
+                            const addressInput = document.getElementById('settings-address');
+                            // Personal info form
+                            document.getElementById('personal-info-form').addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                profileName.textContent = fullnameInput.value;
+                                profileInitials.textContent = fullnameInput.value.split(' ').map(n => n[0]).join('').toUpperCase();
+                                document.getElementById('personal-info-success').classList.remove('hidden');
+                                setTimeout(() => document.getElementById('personal-info-success').classList.add('hidden'), 2000);
+                            });
+                            // Vehicle info form
+                            document.getElementById('vehicle-info-form').addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                document.getElementById('vehicle-info-success').classList.remove('hidden');
+                                setTimeout(() => document.getElementById('vehicle-info-success').classList.add('hidden'), 2000);
+                            });
+                            // Preferences form
+                            document.getElementById('preferences-form').addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                document.getElementById('preferences-success').classList.remove('hidden');
+                                setTimeout(() => document.getElementById('preferences-success').classList.add('hidden'), 2000);
+                            });
+                            // Profile photo
+                            const profilePhotoBtn = document.getElementById('change-photo-btn');
+                            const profilePhotoInput = document.getElementById('profile-photo-input');
+                            const profilePhotoImg = document.getElementById('profile-photo-img');
+                            profilePhotoBtn.addEventListener('click', function () {
+                                profilePhotoInput.click();
+                            });
+                            profilePhotoInput.addEventListener('change', function (e) {
+                                const file = e.target.files[0];
+                                if (file && file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onload = function (ev) {
+                                        profilePhotoImg.src = ev.target.result;
+                                        profilePhotoImg.classList.remove('hidden');
+                                        profileInitials.classList.add('hidden');
+                                        profilePhotoImg.style.position = "";
+                                        profilePhotoImg.style.left = "";
+                                        profilePhotoImg.style.top = "";
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            });
+                            // Security modals
+                            document.getElementById('change-password-btn').addEventListener('click', function () {
+                                document.getElementById('password-modal').classList.remove('hidden');
+                            });
+                            document.getElementById('2fa-btn').addEventListener('click', function () {
+                                document.getElementById('2fa-modal').classList.remove('hidden');
+                            });
+                            document.getElementById('delete-account-btn').addEventListener('click', function () {
+                                document.getElementById('delete-modal').classList.remove('hidden');
+                                // Reset confirmation input and button state
+                                document.getElementById('delete-confirmation').value = '';
+                                document.getElementById('confirm-delete-btn').disabled = true;
+                                document.getElementById('delete-success').classList.add('hidden');
+                            });
+                            // Password change logic
+                            document.getElementById('change-password-form').addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                document.getElementById('password-success').classList.remove('hidden');
+                                setTimeout(() => {
+                                    document.getElementById('password-success').classList.add('hidden');
+                                    document.getElementById('password-modal').classList.add('hidden');
+                                }, 1500);
+                            });
+                            // 2FA logic
+                            const twofaToggle = document.getElementById('2fa-toggle');
+                            twofaToggle.addEventListener('change', function () {
+                                document.getElementById('2fa-status').textContent = this.checked ? "2FA enabled!" : "2FA disabled!";
+                                document.getElementById('2fa-status').classList.remove('hidden');
+                                setTimeout(() => document.getElementById('2fa-status').classList.add('hidden'), 1500);
+                            });
+
+                            // Delete modal logic (custom style)
+                            // Enable delete button only if input is DELETE
+                            const deleteInput = document.getElementById('delete-confirmation');
+                            const deleteBtn = document.getElementById('confirm-delete-btn');
+                            deleteInput.addEventListener('input', function () {
+                                deleteBtn.disabled = (this.value !== "DELETE");
+                            });
+                            // Close modal on .modal-close click or background click
+                            document.querySelectorAll('#delete-modal .modal-close').forEach(btn => {
+                                btn.addEventListener('click', function () {
+                                    document.getElementById('delete-modal').classList.add('hidden');
+                                });
+                            });
+                            document.getElementById('delete-modal').addEventListener('click', function (e) {
+                                if (e.target === this) this.classList.add('hidden');
+                            });
+                            // Delete action
+                            deleteBtn.addEventListener('click', function () {
+                                if (deleteInput.value === "DELETE") {
+                                    document.getElementById('delete-success').classList.remove('hidden');
+                                    deleteBtn.disabled = true;
+                                    setTimeout(() => {
+                                        document.getElementById('delete-success').classList.add('hidden');
+                                        document.getElementById('delete-modal').classList.add('hidden');
+                                    }, 2000);
+                                }
+                            });
+                        });
+                    </script>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script id="navigation-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const mobileNavButtons = document.querySelectorAll('.mobile-nav button');
+            const contentSections = document.querySelectorAll('.content-section');
+            const pageTitle = document.getElementById('page-title');
+            const mainContent = document.querySelector('.main-content');
+            
+            // Mobile menu toggle
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+                if (sidebar.classList.contains('open')) {
+                    mobileMenuToggle.innerHTML = '<i class="ri-close-line ri-lg"></i>';
+                } else {
+                    mobileMenuToggle.innerHTML = '<i class="ri-menu-line ri-lg"></i>';
+                }
+            });
+            
+            // Function to switch active section
+            function switchSection(targetId) {
+                // Update sidebar items
+                sidebarItems.forEach(item => {
+                    if (item.dataset.target === targetId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                // Update mobile nav buttons
+                mobileNavButtons.forEach(button => {
+                    if (button.dataset.target === targetId) {
+                        button.classList.add('text-primary');
+                    } else {
+                        button.classList.remove('text-primary');
+                    }
+                });
+                
+                // Show/hide content sections
+                contentSections.forEach(section => {
+                    if (section.id === targetId + '-section') {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+                
+                // Update page title
+                switch (targetId) {
+                    case 'dashboard':
+                        pageTitle.textContent = 'Dashboard';
+                        break;
+                    case 'book':
+                        pageTitle.textContent = 'Book a Session';
+                        break;
+                    case 'appointments':
+                        pageTitle.textContent = 'My Appointments';
+                        break;
+                    case 'review':
+                        pageTitle.textContent = 'Submit Review';
+                        break;
+                    case 'settings':
+                        pageTitle.textContent = 'Settings';
+                        break;
+                }
+                
+                // Close sidebar on mobile after selection
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('open');
+                    mobileMenuToggle.innerHTML = '<i class="ri-menu-line ri-lg"></i>';
+                }
+            }
+            
+            // Add click event to sidebar items
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    switchSection(this.dataset.target);
+                });
+            });
+            
+            // Add click event to mobile nav buttons
+            mobileNavButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    switchSection(this.dataset.target);
+                });
+            });
+            
+            // Handle responsive layout
+            function handleResponsiveLayout() {
+                if (window.innerWidth < 768) {
+                    mainContent.classList.remove('ml-64');
+                    sidebar.classList.remove('open');
+                    document.querySelector('.mobile-nav').classList.remove('hidden');
+                } else {
+                    mainContent.classList.add('ml-64');
+                    document.querySelector('.mobile-nav').classList.add('hidden');
+                }
+            }
+            
+            // Initial layout setup
+            handleResponsiveLayout();
+            
+            // Listen for window resize
+            window.addEventListener('resize', handleResponsiveLayout);
+        });
+    </script>
+
+    <script id="booking-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Service selection
+            const serviceCards = document.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    serviceCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+            
+            // Service type toggle
+            const homeService = document.getElementById('home-service');
+            const officeService = document.getElementById('office-service');
+            const locationInput = document.getElementById('location-input');
+            
+            function updateRadioStyles() {
+                const homeLabel = document.querySelector('label[for="home-service"]');
+                const officeLabel = document.querySelector('label[for="office-service"]');
+                
+                if (homeService.checked) {
+                    homeLabel.querySelector('span span').classList.remove('hidden');
+                    officeLabel.querySelector('span span').classList.add('hidden');
+                    locationInput.classList.remove('hidden');
+                } else {
+                    homeLabel.querySelector('span span').classList.add('hidden');
+                    officeLabel.querySelector('span span').classList.remove('hidden');
+                    locationInput.classList.add('hidden');
+                }
+            }
+            
+            homeService.addEventListener('change', updateRadioStyles);
+            officeService.addEventListener('change', updateRadioStyles);
+            
+            // Initialize radio styles
+            updateRadioStyles();
+            
+            // Calendar day selection
+            const calendarDays = document.querySelectorAll('.calendar-day:not(.disabled)');
+            calendarDays.forEach(day => {
+                day.addEventListener('click', function() {
+                    calendarDays.forEach(d => d.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+            
+            // Time slot selection
+            const timeSlots = document.querySelectorAll('.time-slot.available');
+            timeSlots.forEach(slot => {
+                slot.addEventListener('click', function() {
+                    timeSlots.forEach(s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+        });
+    </script>
+
+    <script id="review-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Star rating hover effect
+            const starLabels = document.querySelectorAll('.star-rating label');
+            const starInputs = document.querySelectorAll('.star-rating input');
+            
+            starLabels.forEach((label, index) => {
+                label.addEventListener('mouseover', function() {
+                    for (let i = 0; i <= index; i++) {
+                        starLabels[i].style.color = '#FFB340';
+                    }
+                    for (let i = index + 1; i < starLabels.length; i++) {
+                        starLabels[i].style.color = '#D1D5DB';
+                    }
+                });
+                
+                label.addEventListener('mouseout', function() {
+                    resetStars();
+                });
+                
+                label.addEventListener('click', function() {
+                    starInputs[index].checked = true;
+                    resetStars();
+                });
+            });
+            
+            function resetStars() {
+                let checkedIndex = -1;
+                starInputs.forEach((input, i) => {
+                    if (input.checked) {
+                        checkedIndex = i;
+                    }
+                });
+                
+                starLabels.forEach((label, i) => {
+                    if (i <= checkedIndex) {
+                        label.style.color = '#FFB340';
+                    } else {
+                        label.style.color = '#D1D5DB';
+                    }
+                });
+            }
+            
+            // Initialize star rating
+            resetStars();
+        });
+    </script>
+</body>
+</html>

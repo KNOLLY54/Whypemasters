@@ -288,69 +288,46 @@
   </head>
   <body class="bg-white text-gray-800">
     <!-- Navigation -->
-<nav
-        class="glass fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all duration-300"
->
-        <div class="container mx-auto flex items-center justify-between">
-                <a href="#" class="flex items-center space-x-3">
-                        <img
-                                src="https://res.cloudinary.com/dtrn8j0sz/image/upload/c_fill,w_300,h_70/v1749759815/file_00000000552461f49505c255be9104d0_tigpnw.png"
-                                alt="WhypeMasters Logo"
-                                class="h-12 w-auto object-contain"
-                        />
-                </a>
-                <div class="hidden md:flex items-center space-x-8 ml-8">
-                        <a href="#" class="nav-link active text-gray-800 font-semibold px-2"
-                                >Home</a
-                        >
-                        <a href="#services" class="nav-link text-gray-800 font-semibold px-2"
-                                >Services</a
-                        >
-                        <a href="#booking" id="nav-booking-link" class="nav-link text-gray-800 font-semibold px-2">
-                                Booking
-                        </a>
-                        <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                        const navBookingLink = document.getElementById("nav-booking-link");
-                                        const bookingModal = document.getElementById("booking-modal");
-                                        const bookingIdDisplay = document.getElementById("booking-id");
-                                        function generateBookingId() {
-                                                const timestamp = Date.now().toString().slice(-6);
-                                                const random = Math.floor(Math.random() * 1000)
-                                                        .toString()
-                                                        .padStart(3, "0");
-                                                return `WM${timestamp}${random}`;
-                                        }
-                                        if (navBookingLink && bookingModal && bookingIdDisplay) {
-                                                navBookingLink.addEventListener("click", function (e) {
-                                                        e.preventDefault();
-                                                        bookingModal.classList.remove("hidden");
-                                                        bookingIdDisplay.textContent = generateBookingId();
-                                                });
-                                        }
-                                });
-                        </script>
-                        <a href="#gallery" class="nav-link text-gray-800 font-semibold px-2"
-                                >Gallery</a
-                        >
-                        <a href="#contact" class="nav-link text-gray-800 font-semibold px-2"
-                                >Contact</a
-                        >
-                </div>
-                <button
-                        id="nav-book-btn"
-                        class="hidden md:block bg-primary hover:bg-blue-700 text-white px-6 py-2 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap ml-8"
-                >
-                        Book Now
-                </button>
-                <div
-                        class="md:hidden w-10 h-10 flex items-center justify-center ml-4"
-                        id="mobile-menu-button"
-                >
-                        <i class="ri-menu-line text-gray-800 ri-2x"></i>
-                </div>
+    <nav
+      class="glass fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all duration-300"
+    >
+      <div class="container mx-auto flex items-center justify-between">
+        <img
+          src="https://res.cloudinary.com/dtrn8j0sz/image/upload/c_fill,w_300,h_70/v1749759815/file_00000000552461f49505c255be9104d0_tigpnw.png"
+          alt=""
+        />
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#" class="nav-link active text-gray-800 font-semibold"
+            >Home</a
+          >
+          <a href="#services" class="nav-link text-gray-800 font-semibold"
+            >Services</a
+          >
+          <a href="#booking" class="nav-link text-gray-800 font-semibold"
+            >Booking</a
+          >
+          <a href="#gallery" class="nav-link text-gray-800 font-semibold"
+            >Gallery</a
+          >
+          <a href="#contact" class="nav-link text-gray-800 font-semibold"
+            >Contact</a
+          >
         </div>
-</nav>
+        <button
+          id="nav-book-btn"
+          class="hidden md:block bg-primary hover:bg-blue-700 text-white px-6 py-2 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap"
+        >
+          Book Now
+        </button>
+
+        <div
+          class="md:hidden w-10 h-10 flex items-center justify-center"
+          id="mobile-menu-button"
+        >
+          <i class="ri-menu-line text-gray-800 ri-2x"></i>
+        </div>
+      </div>
+    </nav>
     <!-- Booking form -->
     <div id="booking-modal" class="fixed inset-0 z-[100] hidden">
       <div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
@@ -485,12 +462,13 @@
         >
         <a
           href="#booking"
-          id="mobile-menu-book-btn"
+          id="mobile-book-btn"
           class="bg-primary hover:bg-blue-700 text-white px-8 py-3 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 mt-6 whitespace-nowrap"
-          >Book Now</a>
+          >Book Now</a
+        >
         <script>
           document.addEventListener("DOMContentLoaded", function () {
-            const mobileMenuBookBtn = document.getElementById("mobile-menu-book-btn");
+            const mobileBookBtn = document.getElementById("mobile-book-btn");
             const bookingModal = document.getElementById("booking-modal");
             const bookingIdDisplay = document.getElementById("booking-id");
             function generateBookingId() {
@@ -500,8 +478,8 @@
                 .padStart(3, "0");
               return `WM${timestamp}${random}`;
             }
-            if (mobileMenuBookBtn && bookingModal && bookingIdDisplay) {
-              mobileMenuBookBtn.addEventListener("click", function (e) {
+            if (mobileBookBtn && bookingModal && bookingIdDisplay) {
+              mobileBookBtn.addEventListener("click", function (e) {
                 e.preventDefault();
                 bookingModal.classList.remove("hidden");
                 bookingIdDisplay.textContent = generateBookingId();
