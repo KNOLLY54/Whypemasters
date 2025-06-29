@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhypeMasters - Premium Car Detailing</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#0052CC',secondary:'#F8F9FA'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Inter', sans-serif;
+overflow-x: hidden;
+}
+h1, h2, h3, h4, h5, h6 {
+font-family: 'Clash Display', sans-serif;
+}
+.glass {
+background: rgba(255, 255, 255, 0.15);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.nav-link {
+position: relative;
+}
+.nav-link::after {
+content: '';
+position: absolute;
+width: 0;
+height: 2px;
+bottom: -4px;
+left: 0;
+background-color: #0052CC;
+transition: width 0.3s ease;
+}
+.nav-link:hover::after,
+.nav-link.active::after {
+width: 100%;
+}
+.hero-bg {
+background-position: center;
+background-size: cover;
+background-repeat: no-repeat;
+}
+.service-card {
+transition: all 0.3s ease;
+}
+.service-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 15px 30px rgba(0, 82, 204, 0.1);
+}
+.slider-container {
+position: relative;
+overflow: hidden;
+height: 400px;
+}
+.slider-before,
+.slider-after {
+position: absolute;
+top: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+.slider-before {
+z-index: 1;
+clip-path: polygon(0 0, var(--clip, 50%) 0, var(--clip, 50%) 100%, 0 100%);
+}
+.slider-handle {
+position: absolute;
+top: 0;
+bottom: 0;
+left: var(--clip, 50%);
+width: 4px;
+background: white;
+transform: translateX(-50%);
+z-index: 2;
+cursor: ew-resize;
+}
+.slider-handle::after {
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 40px;
+height: 40px;
+background: white;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.floating-footer {
+position: fixed;
+bottom: 30px;
+right: 30px;
+z-index: 100;
+transition: all 0.3s ease;
+}
+.floating-footer:hover {
+transform: translateY(-5px);
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+input[type="number"] {
+-moz-appearance: textfield;
+appearance: textfield;
+}
+.custom-checkbox {
+position: relative;
+padding-left: 30px;
+cursor: pointer;
+user-select: none;
+}
+.custom-checkbox input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+height: 0;
+width: 0;
+}
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #e2e8f0;
+border-radius: 4px;
+transition: all 0.2s ease;
+}
+.custom-checkbox:hover input ~ .checkmark {
+border-color: #0052CC;
+}
+.custom-checkbox input:checked ~ .checkmark {
+background-color: #0052CC;
+border-color: #0052CC;
+}
+.checkmark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-checkbox input:checked ~ .checkmark:after {
+display: block;
+}
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.testimonial-card {
+transition: all 0.3s ease;
+}
+.testimonial-card:hover {
+transform: translateY(-5px);
+}
+.animate-fade-in {
+animation: fadeIn 0.8s ease forwards;
+}
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+.custom-switch {
+position: relative;
+display: inline-block;
+width: 50px;
+height: 24px;
+}
+.custom-switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.switch-slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #e2e8f0;
+transition: .4s;
+border-radius: 34px;
+}
+.switch-slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .switch-slider {
+background-color: #0052CC;
+}
+input:checked + .switch-slider:before {
+transform: translateX(26px);
+}
+.calendar-day {
+transition: all 0.2s ease;
+}
+.calendar-day:hover:not(.inactive) {
+background-color: rgba(0, 82, 204, 0.1);
+transform: scale(1.05);
+}
+.calendar-day.selected {
+background-color: #0052CC;
+color: white;
+transform: scale(1.05);
+}
+.calendar-day.inactive {
+opacity: 0.3;
+cursor: default;
+}
+</style>
+</head>
+<body class="bg-white text-gray-800">
+<!-- Navigation -->
+<nav class="glass fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-all duration-300">
+<div class="container mx-auto flex items-center justify-between">
+<img src="" alt="">
+<div class="hidden md:flex items-center space-x-8">
+<a href="#" class="nav-link active text-gray-800 font-semibold">Home</a>
+<a href="#services" class="nav-link text-gray-800 font-semibold">Services</a>
+<a href="#booking" class="nav-link text-gray-800 font-semibold">Booking</a>
+<a href="#gallery" class="nav-link text-gray-800 font-semibold">Gallery</a>
+<a href="#contact" class="nav-link text-gray-800 font-semibold">Contact</a>
+</div>
+<button id="nav-book-btn" class="hidden md:block bg-primary hover:bg-blue-700 text-white px-6 py-2 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">Book Now</button>
+
+<div class="md:hidden w-10 h-10 flex items-center justify-center" id="mobile-menu-button">
+<i class="ri-menu-line text-gray-800 ri-2x"></i>
+</div>
+</div>
+</nav>
+<!-- Booking form -->
+ <div id="booking-modal" class="fixed inset-0 z-[100] hidden">
+<div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg">
+<div class="bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-8 mx-4 relative">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-2xl font-bold">Let's Know You</h3>
+<button id="close-modal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5">
+<i class="ri-close-line text-xl"></i>
+</button>
+</div>
+<form id="booking-form" class="space-y-6">
+<div>
+<label class="block text-gray-700 mb-2" for="name">Full Name</label>
+<input type="text" id="name" name="name" class="w-full px-4 py-3 bg-white/50 backdrop-blur rounded-lg border border-gray-200 focus:border-primary focus:outline-none" required>
+</div>
+<div>
+<label class="block text-gray-700 mb-2" for="email">Email Address</label>
+<input type="email" id="email" name="email" class="w-full px-4 py-3 bg-white/50 backdrop-blur rounded-lg border border-gray-200 focus:border-primary focus:outline-none" required>
+</div>
+<div>
+<label class="block text-gray-700 mb-2" for="phone">Phone Number</label>
+<input type="tel" id="phone" name="phone" class="w-full px-4 py-3 bg-white/50 backdrop-blur rounded-lg border border-gray-200 focus:border-primary focus:outline-none" required>
+</div>
+<div>
+<label class="block text-gray-700 mb-2">Your Booking ID</label>
+<div class="w-full px-4 py-3 bg-white/50 backdrop-blur rounded-lg border border-gray-200 font-mono" id="booking-id"></div>
+</div>
+<button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white py-3 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">Continue Booking</button>
+</form>
+<div id="loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center">
+<div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+<p class="text-gray-700 font-medium">Processing your booking...</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Mobile Menu -->
+<div class="fixed inset-0 bg-white/80 backdrop-blur-lg z-50 transform translate-x-full transition-transform duration-300 md:hidden" id="mobile-menu">
+<div class="flex justify-end p-6">
+<div class="w-10 h-10 flex items-center justify-center" id="close-menu-button">
+<i class="ri-close-line text-gray-800 ri-2x"></i>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-8 mt-10">
+<a href="#" class="text-xl font-semibold text-gray-800">Home</a>
+<a href="#services" class="text-xl font-semibold text-gray-800">Services</a>
+<a href="#booking" class="text-xl font-semibold text-gray-800">Booking</a>
+<a href="#gallery" class="text-xl font-semibold text-gray-800">Gallery</a>
+<a href="#contact" class="text-xl font-semibold text-gray-800">Contact</a>
+<a href="#booking" class="bg-primary hover:bg-blue-700 text-white px-8 py-3 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 mt-6 whitespace-nowrap">Book Now</a>
+</div>
+</div>
+<!-- Hero Section -->
+<section class="hero-bg min-h-screen flex items-center pt-20" style="background-image: url('https://readdy.ai/api/search-image?query=luxury%20car%20detailing%20with%20water%20droplets%20and%20reflections%2C%20premium%20car%20wash%2C%20chrome%20blue%20accents%2C%20professional%20detailing%20tools%2C%20modern%20and%20clean%20aesthetic%2C%20bright%20lighting%2C%20high-end%20automotive%20care%2C%20showroom%20quality%20finish%2C%20soft%20focus%20background&width=1920&height=1080&seq=1&orientation=landscape');">
+<div class="container mx-auto px-6 py-20">
+<div class="flex flex-col md:flex-row items-center">
+<div class="md:w-1/2 text-center md:text-left mb-10 md:mb-0 relative">
+<div class="absolute inset-0 bg-white/30 backdrop-blur-sm rounded-3xl"></div>
+<div class="relative p-8 md:p-10">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">Experience <span class="text-primary">Premium</span> Car Detailing</h1>
+<p class="text-lg md:text-xl mb-8 text-gray-50 max-w-lg">Transform your vehicle with our meticulous detailing services. We bring showroom shine to your doorstep in Port Harcourt.</p>
+<div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
+<a href="#booking" class="bg-primary hover:bg-blue-700 text-white px-8 py-4 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">Book Now</a>
+<a href="#services" class="bg-white hover:bg-gray-100 text-primary border border-primary px-8 py-4 !rounded-button shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">Our Services</a>
+</div>
+</div>
+</div>
+<div class="md:w-1/2 relative">
+<!-- This div is intentionally left empty as the background image serves as the visual element -->
+</div>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section class="py-20 bg-secondary">
+<div class="container mx-auto px-6">
+<div class="flex flex-col md:flex-row items-center">
+<div class="md:w-1/2 mb-10 md:mb-0">
+<img src="https://readdy.ai/api/search-image?query=professional%20car%20detailer%20working%20on%20a%20luxury%20vehicle%2C%20attention%20to%20detail%2C%20premium%20car%20care%2C%20bright%20modern%20setting%2C%20high-end%20tools%20and%20products%2C%20clean%20workspace%2C%20professional%20equipment%2C%20soft%20lighting&width=600&height=600&seq=2&orientation=squarish" alt="Professional Car Detailing" class="rounded-2xl shadow-xl object-cover w-full h-full object-top">
+</div>
+<div class="md:w-1/2 md:pl-12">
+<h2 class="text-3xl md:text-4xl font-bold mb-6">Why Choose <span class="text-primary">WhypeMasters</span></h2>
+<p class="text-gray-700 mb-6">Founded in 2020, WhypeMasters has quickly become Port Harcourt's premier destination for automotive aesthetics and care. We combine cutting-edge techniques with premium products to deliver results that exceed expectations.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex items-start">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mr-4">
+<i class="ri-shield-check-line text-primary ri-lg"></i>
+</div>
+<div>
+<h3 class="font-semibold text-lg mb-2">Premium Products</h3>
+<p class="text-gray-600">We use only the highest quality detailing products for lasting results.</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mr-4">
+<i class="ri-user-star-line text-primary ri-lg"></i>
+</div>
+<div>
+<h3 class="font-semibold text-lg mb-2">Expert Team</h3>
+<p class="text-gray-600">Our certified detailers have years of experience with all vehicle types.</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mr-4">
+<i class="ri-time-line text-primary ri-lg"></i>
+</div>
+<div>
+<h3 class="font-semibold text-lg mb-2">Timely Service</h3>
+<p class="text-gray-600">We respect your schedule with punctual service and efficient workflows.</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mr-4">
+<i class="ri-customer-service-2-line text-primary ri-lg"></i>
+</div>
+<div>
+<h3 class="font-semibold text-lg mb-2">Customer Satisfaction</h3>
+<p class="text-gray-600">Your satisfaction is guaranteed with our attention to detail.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section id="services" class="py-20">
+<div class="container mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Our Premium Services</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Discover our comprehensive range of detailing services designed to restore and protect your vehicle's appearance.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<div class="service-card bg-white rounded-2xl shadow-lg overflow-hidden">
+<div class="h-48 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=exterior%20car%20detailing%2C%20professional%20washing%20and%20polishing%2C%20bright%20clean%20environment%2C%20water%20beading%20on%20paint%2C%20foam%20application%2C%20high-end%20detailing%20products%2C%20premium%20car%20care&width=400&height=300&seq=3&orientation=landscape" alt="Exterior Detailing" class="w-full h-full object-cover object-top">
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-3">Exterior Detailing</h3>
+<p class="text-gray-600 mb-4">Complete exterior cleaning, clay bar treatment, polishing, and protective coating application.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-semibold">From ₦25,000</span>
+<a href="#booking" class="text-primary hover:text-blue-700 font-medium flex items-center">
+Book Now
+<i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="service-card bg-white rounded-2xl shadow-lg overflow-hidden">
+<div class="h-48 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=interior%20car%20detailing%2C%20vacuum%20cleaning%2C%20leather%20conditioning%2C%20dashboard%20polishing%2C%20premium%20car%20interior%2C%20clean%20and%20organized%2C%20professional%20detailing%20tools&width=400&height=300&seq=4&orientation=landscape" alt="Interior Detailing" class="w-full h-full object-cover object-top">
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-3">Interior Detailing</h3>
+<p class="text-gray-600 mb-4">Deep cleaning of all interior surfaces, steam cleaning, leather conditioning, and fabric protection.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-semibold">From ₦20,000</span>
+<a href="#booking" class="text-primary hover:text-blue-700 font-medium flex items-center">
+Book Now
+<i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="service-card bg-white rounded-2xl shadow-lg overflow-hidden">
+<div class="h-48 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=ceramic%20coating%20application%20on%20luxury%20car%2C%20professional%20detailer%20applying%20coating%2C%20bright%20lighting%2C%20high-end%20garage%2C%20premium%20car%20care%20products%2C%20protective%20equipment&width=400&height=300&seq=5&orientation=landscape" alt="Ceramic Coating" class="w-full h-full object-cover object-top">
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-3">Ceramic Coating</h3>
+<p class="text-gray-600 mb-4">Long-lasting protection with premium ceramic coating that enhances gloss and provides hydrophobic properties.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-semibold">From ₦80,000</span>
+<a href="#booking" class="text-primary hover:text-blue-700 font-medium flex items-center">
+Book Now
+<i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="service-card bg-white rounded-2xl shadow-lg overflow-hidden">
+<div class="h-48 overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=engine%20bay%20detailing%2C%20clean%20engine%20compartment%2C%20professional%20cleaning%20tools%2C%20degreaser%20application%2C%20premium%20car%20maintenance%2C%20bright%20lighting%2C%20organized%20workspace&width=400&height=300&seq=6&orientation=landscape" alt="Engine Bay Detailing" class="w-full h-full object-cover object-top">
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-3">Engine Bay Detailing</h3>
+<p class="text-gray-600 mb-4">Safe cleaning and dressing of engine components to restore appearance and prevent corrosion.</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-semibold">From ₦15,000</span>
+<a href="#booking" class="text-primary hover:text-blue-700 font-medium flex items-center">
+Book Now
+<i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="text-center mt-12">
+<a href="#services-full" class="inline-flex items-center bg-white hover:bg-gray-100 text-primary border border-primary px-8 py-3 !rounded-button shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+View All Services
+<i class="ri-arrow-right-line ml-2"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Before/After Slider Section -->
+<section class="py-20 bg-secondary">
+<div class="container mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">See The Difference</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Drag the slider to reveal the transformation our detailing services can achieve.</p>
+</div>
+<div class="slider-container mx-auto rounded-2xl overflow-hidden shadow-2xl" style="max-width: 800px;">
+<img src="https://readdy.ai/api/search-image?query=dirty%20luxury%20car%20with%20mud%2C%20dust%2C%20water%20spots%2C%20neglected%20vehicle%20exterior%2C%20dull%20paint%2C%20visible%20dirt%20and%20grime%2C%20realistic%20lighting&width=800&height=500&seq=7&orientation=landscape" alt="Before Detailing" class="slider-after w-full h-full object-cover object-top">
+<img src="https://readdy.ai/api/search-image?query=same%20luxury%20car%20after%20professional%20detailing%2C%20showroom%20finish%2C%20perfect%20reflections%2C%20glossy%20paint%2C%20water%20beading%2C%20immaculate%20condition%2C%20same%20angle%20as%20before%20image%2C%20realistic%20lighting&width=800&height=500&seq=8&orientation=landscape" alt="After Detailing" class="slider-before w-full h-full object-cover object-top">
+<div class="slider-handle" id="slider-handle"></div>
+</div>
+<div class="text-center mt-12">
+<a href="#gallery" class="inline-flex items-center bg-white hover:bg-gray-100 text-primary border border-primary px-8 py-3 !rounded-button shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+View Gallery
+<i class="ri-arrow-right-line ml-2"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Testimonials Section -->
+<section class="py-20">
+<div class="container mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">What Our Clients Say</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Hear from our satisfied customers about their experience with WhypeMasters.</p>
+</div>
+<div class="relative">
+<div class="flex overflow-x-auto pb-8 space-x-6 hide-scrollbar" id="testimonials-container">
+<div class="testimonial-card flex-shrink-0 w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-6">
+<div class="flex items-center mb-4">
+<div class="w-12 h-12 bg-gray-200 rounded-full overflow-hidden mr-4">
+<img src="https://readdy.ai/api/search-image?query=professional%20Nigerian%20businessman%20portrait%2C%20formal%20attire%2C%20confident%20expression%2C%20neutral%20background%2C%20headshot&width=100&height=100&seq=9&orientation=squarish" alt="Chinedu Okonkwo" class="w-full h-full object-cover object-top">
+</div>
+<div>
+<h4 class="font-bold">Chinedu Okonkwo</h4>
+<p class="text-gray-500 text-sm">Range Rover Owner</p>
+</div>
+</div>
+<div class="flex text-yellow-400 mb-3">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+</div>
+<p class="text-gray-600">"WhypeMasters transformed my Range Rover completely. The ceramic coating they applied has kept my vehicle looking showroom-new for months. Their attention to detail is unmatched in Port Harcourt."</p>
+</div>
+<div class="testimonial-card flex-shrink-0 w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-6">
+<div class="flex items-center mb-4">
+<div class="w-12 h-12 bg-gray-200 rounded-full overflow-hidden mr-4">
+<img src="https://readdy.ai/api/search-image?query=professional%20Nigerian%20businesswoman%20portrait%2C%20corporate%20attire%2C%20confident%20smile%2C%20neutral%20background%2C%20headshot&width=100&height=100&seq=10&orientation=squarish" alt="Amara Eze" class="w-full h-full object-cover object-top">
+</div>
+<div>
+<h4 class="font-bold">Amara Eze</h4>
+<p class="text-gray-500 text-sm">Mercedes-Benz Owner</p>
+</div>
+</div>
+<div class="flex text-yellow-400 mb-3">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+</div>
+<p class="text-gray-600">"I've tried several detailing services in Port Harcourt, but WhypeMasters stands out. Their interior detailing removed stains I thought were permanent. Booking was easy and the team was professional throughout."</p>
+</div>
+<div class="testimonial-card flex-shrink-0 w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-6">
+<div class="flex items-center mb-4">
+<div class="w-12 h-12 bg-gray-200 rounded-full overflow-hidden mr-4">
+<img src="https://readdy.ai/api/search-image?query=professional%20Nigerian%20man%20portrait%2C%20casual%20smart%20attire%2C%20friendly%20expression%2C%20neutral%20background%2C%20headshot&width=100&height=100&seq=11&orientation=squarish" alt="Oluwaseun Adeyemi" class="w-full h-full object-cover object-top">
+</div>
+<div>
+<h4 class="font-bold">Oluwaseun Adeyemi</h4>
+<p class="text-gray-500 text-sm">Toyota Land Cruiser Owner</p>
+</div>
+</div>
+<div class="flex text-yellow-400 mb-3">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-half-fill"></i>
+</div>
+<p class="text-gray-600">"My Land Cruiser sees rough terrain regularly, and WhypeMasters always brings it back to life. Their engine bay detailing is particularly impressive. The team is punctual and respectful of my property."</p>
+</div>
+<div class="testimonial-card flex-shrink-0 w-full md:w-1/3 bg-white rounded-2xl shadow-lg p-6">
+<div class="flex items-center mb-4">
+<div class="w-12 h-12 bg-gray-200 rounded-full overflow-hidden mr-4">
+<img src="https://readdy.ai/api/search-image?query=professional%20Nigerian%20woman%20portrait%2C%20elegant%20attire%2C%20warm%20smile%2C%20neutral%20background%2C%20headshot&width=100&height=100&seq=12&orientation=squarish" alt="Ngozi Okafor" class="w-full h-full object-cover object-top">
+</div>
+<div>
+<h4 class="font-bold">Ngozi Okafor</h4>
+<p class="text-gray-500 text-sm">BMW X5 Owner</p>
+</div>
+</div>
+<div class="flex text-yellow-400 mb-3">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+</div>
+<p class="text-gray-600">"The mobile service from WhypeMasters is a game-changer. They came to my office and detailed my BMW while I worked. The results were spectacular and the convenience factor is unbeatable."</p>
+</div>
+</div>
+<div class="absolute top-1/2 -left-4 transform -translate-y-1/2 hidden md:block">
+<button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center focus:outline-none" id="prev-testimonial">
+<i class="ri-arrow-left-s-line text-primary"></i>
+</button>
+</div>
+<div class="absolute top-1/2 -right-4 transform -translate-y-1/2 hidden md:block">
+<button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center focus:outline-none" id="next-testimonial">
+<i class="ri-arrow-right-s-line text-primary"></i>
+</button>
+</div>
+</div>
+<div class="flex justify-center mt-6 md:hidden">
+<button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center focus:outline-none mx-2" id="prev-testimonial-mobile">
+<i class="ri-arrow-left-s-line text-primary"></i>
+</button>
+<button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center focus:outline-none mx-2" id="next-testimonial-mobile">
+<i class="ri-arrow-right-s-line text-primary"></i>
+</button>
+</div>
+</div>
+</section>
+
+<!-- Gallery Section -->
+<section id="gallery" class="py-20">
+<div class="container mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Our Work Gallery</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Browse through our portfolio of transformations and see the quality of our detailing services.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=luxury%20car%20exterior%20detailing%20before%20and%20after%2C%20side%20by%20side%20comparison%2C%20professional%20car%20wash%2C%20premium%20detailing%2C%20high%20quality%20finish%2C%20showroom%20shine&width=400&height=300&seq=13&orientation=landscape" alt="Exterior Detailing" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Exterior Transformation</h3>
+<p class="text-gray-600">Range Rover Sport</p>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=luxury%20car%20interior%20detailing%20before%20and%20after%2C%20side%20by%20side%20comparison%2C%20professional%20cleaning%2C%20leather%20conditioning%2C%20dashboard%20polishing&width=400&height=300&seq=14&orientation=landscape" alt="Interior Detailing" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Interior Restoration</h3>
+<p class="text-gray-600">Mercedes-Benz S-Class</p>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=ceramic%20coating%20application%20on%20black%20luxury%20car%2C%20water%20beading%20effect%2C%20professional%20detailing%2C%20high%20gloss%20finish%2C%20paint%20protection&width=400&height=300&seq=15&orientation=landscape" alt="Ceramic Coating" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Ceramic Coating</h3>
+<p class="text-gray-600">BMW 7 Series</p>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=engine%20bay%20detailing%20before%20and%20after%2C%20side%20by%20side%20comparison%2C%20professional%20cleaning%2C%20degreasing%2C%20dressing%20of%20components&width=400&height=300&seq=16&orientation=landscape" alt="Engine Bay Detailing" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Engine Bay Detailing</h3>
+<p class="text-gray-600">Lexus LX 570</p>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=wheel%20and%20tire%20detailing%20before%20and%20after%2C%20side%20by%20side%20comparison%2C%20professional%20cleaning%2C%20tire%20shine%2C%20rim%20polishing&width=400&height=300&seq=17&orientation=landscape" alt="Wheel Detailing" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Wheel & Tire Detailing</h3>
+<p class="text-gray-600">Porsche Cayenne</p>
+</div>
+</div>
+<div class="rounded-2xl overflow-hidden shadow-lg">
+<img src="https://readdy.ai/api/search-image?query=headlight%20restoration%20before%20and%20after%2C%20side%20by%20side%20comparison%2C%20professional%20polishing%2C%20clarity%20improvement%2C%20UV%20protection&width=400&height=300&seq=18&orientation=landscape" alt="Headlight Restoration" class="w-full h-64 object-cover object-top">
+<div class="p-4">
+<h3 class="font-bold text-lg">Headlight Restoration</h3>
+<p class="text-gray-600">Toyota Land Cruiser</p>
+</div>
+</div>
+</div>
+<div class="text-center mt-12">
+<a href="#gallery-full" class="inline-flex items-center bg-white hover:bg-gray-100 text-primary border border-primary px-8 py-3 !rounded-button shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+View Full Gallery
+<i class="ri-arrow-right-line ml-2"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section id="contact" class="py-20 bg-secondary">
+<div class="container mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Have questions or ready to book? Contact us through any of these channels.</p>
+</div>
+<div class="flex flex-col md:flex-row">
+<div class="md:w-1/2 mb-10 md:mb-0 md:pr-8">
+<div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+<h3 class="text-2xl font-bold mb-6">Send Us a Message</h3>
+<form>
+<div class="mb-6">
+<label for="contact-name" class="block text-gray-700 mb-2">Your Name</label>
+<input type="text" id="contact-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:outline-none" placeholder="John Doe">
+</div>
+<div class="mb-6">
+<label for="contact-email" class="block text-gray-700 mb-2">Email Address</label>
+<input type="email" id="contact-email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:outline-none" placeholder="john@example.com">
+</div>
+<div class="mb-6">
+<label for="contact-subject" class="block text-gray-700 mb-2">Subject</label>
+<input type="text" id="contact-subject" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:outline-none" placeholder="Inquiry about detailing services">
+</div>
+<div class="mb-6">
+<label for="contact-message" class="block text-gray-700 mb-2">Message</label>
+<textarea id="contact-message" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:outline-none" placeholder="Your message here..."></textarea>
+</div>
+<button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white py-3 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">Send Message</button>
+</form>
+</div>
+</div>
+<div class="md:w-1/2">
+<div class="bg-white rounded-2xl shadow-xl overflow-hidden h-[400px]">
+<div class="h-full w-full" style="background-image: url('https://public.readdy.ai/gen_page/map_placeholder_1280x720.png'); background-position: center; background-size: cover;"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="bg-white rounded-2xl shadow-lg p-6">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mb-4">
+<i class="ri-map-pin-line text-primary ri-lg"></i>
+</div>
+<h4 class="font-bold text-lg mb-2">Our Location</h4>
+<p class="text-gray-600">15 Aba Road, GRA Phase 2, Port Harcourt, Rivers State, Nigeria</p>
+</div>
+<div class="bg-white rounded-2xl shadow-lg p-6">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mb-4">
+<i class="ri-time-line text-primary ri-lg"></i>
+</div>
+<h4 class="font-bold text-lg mb-2">Working Hours</h4>
+<p class="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM<br>Saturday: 9:00 AM - 5:00 PM<br>Sunday: Closed</p>
+</div>
+<div class="bg-white rounded-2xl shadow-lg p-6">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mb-4">
+<i class="ri-phone-line text-primary ri-lg"></i>
+</div>
+<h4 class="font-bold text-lg mb-2">Phone & WhatsApp</h4>
+<p class="text-gray-600">+234 803 456 7890<br>+234 705 123 4567</p>
+</div>
+<div class="bg-white rounded-2xl shadow-lg p-6">
+<div class="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full mb-4">
+<i class="ri-mail-line text-primary ri-lg"></i>
+</div>
+<h4 class="font-bold text-lg mb-2">Email Us</h4>
+<p class="text-gray-600">info@whypemasters.com<br>bookings@whypemasters.com</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Footer -->
+<div class="floating-footer glass rounded-2xl shadow-xl p-6 max-w-xs">
+    <div class="flex items-center justify-between mb-4" id="footer-header">
+        <h4 class="font-bold text-lg" id="footer-title">Quick Links</h4>
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100" id="toggle-footer">
+            <i class="ri-arrow-up-s-line"></i>
+        </button>
+    </div>
+    <div id="footer-content">
+        <div class="flex flex-col space-y-3 mb-4">
+            <a href="#" class="text-gray-700 hover:text-primary transition-colors">Home</a>
+            <a href="#services" class="text-gray-700 hover:text-primary transition-colors">Services</a>
+            <a href="booking.html" class="text-gray-700 hover:text-primary transition-colors">Booking</a>
+            <a href="#gallery" class="text-gray-700 hover:text-primary transition-colors">Gallery</a>
+            <a href="#contact" class="text-gray-700 hover:text-primary transition-colors">Contact</a>
+        </div>
+        <div class="flex space-x-4 mb-4">
+            <a href="#" class="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                <i class="ri-instagram-line text-primary"></i>
+            </a>
+            <a href="#" class="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                <i class="ri-facebook-fill text-primary"></i>
+            </a>
+            <a href="#" class="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                <i class="ri-twitter-x-fill text-primary"></i>
+            </a>
+            <a href="#" class="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-full hover:bg-primary/20 transition-colors">
+                <i class="ri-whatsapp-line text-primary"></i>
+            </a>
+        </div>
+        <a href="#booking" class="block bg-primary hover:bg-blue-700 text-white text-center py-2 !rounded-button shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">Book Now</a>
+    </div>
+</div>
+<script id="floating-footer-script">
+document.addEventListener('DOMContentLoaded', function() {
+        const toggleFooter = document.getElementById('toggle-footer');
+        const footerContent = document.getElementById('footer-content');
+        const floatingFooter = document.querySelector('.floating-footer');
+        const footerTitle = document.getElementById('footer-title');
+        if (!toggleFooter || !footerContent || !floatingFooter || !footerTitle) return;
+        let isExpanded = true;
+
+        // Add bounce animation CSS only once
+        if (!document.getElementById('footer-bounce-style')) {
+                const style = document.createElement('style');
+                style.id = 'footer-bounce-style';
+                style.innerHTML = `
+                        @keyframes bounce-ball {
+                                0%, 100% { transform: translateY(0); box-shadow: 0 8px 24px 0 rgba(0,0,0,0.20);}
+                                20% { transform: translateY(-10px);}
+                                40% { transform: translateY(0);}
+                                60% { transform: translateY(-5px);}
+                                80% { transform: translateY(0);}
+                        }
+                        .footer-bounce {
+                                animation: bounce-ball 1.2s infinite;
+                                box-shadow: 0 8px 24px 0 rgba(0,0,0,0.20) !important;
+                        }
+                `;
+                document.head.appendChild(style);
+        }
+
+        // Helper to get current icon (based on first visible link)
+        function getCurrentIcon() {
+                // You can map based on current section if desired
+                // For now, always show menu icon
+                return '<i class="ri-menu-line text-primary text-2xl"></i>';
+        }
+
+        function collapseFooter() {
+                footerContent.style.display = 'none';
+                footerTitle.style.display = 'none';
+                floatingFooter.classList.add('footer-bounce');
+                floatingFooter.style.width = '56px';
+                floatingFooter.style.height = '56px';
+                floatingFooter.style.maxWidth = '56px';
+                floatingFooter.style.maxHeight = '56px';
+                floatingFooter.style.borderRadius = '9999px';
+                floatingFooter.style.padding = '0';
+                floatingFooter.style.display = 'flex';
+                floatingFooter.style.justifyContent = 'center';
+                floatingFooter.style.alignItems = 'center';
+                toggleFooter.innerHTML = getCurrentIcon();
+                toggleFooter.style.width = '56px';
+                toggleFooter.style.height = '56px';
+                toggleFooter.style.background = 'none';
+                toggleFooter.style.boxShadow = 'none';
+                toggleFooter.style.margin = '0';
+                toggleFooter.style.display = 'flex';
+                toggleFooter.style.alignItems = 'center';
+                toggleFooter.style.justifyContent = 'center';
+        }
+
+        function expandFooter() {
+                footerContent.style.display = 'block';
+                footerTitle.style.display = '';
+                floatingFooter.classList.remove('footer-bounce');
+                floatingFooter.style.width = '';
+                floatingFooter.style.height = '';
+                floatingFooter.style.maxWidth = '';
+                floatingFooter.style.maxHeight = '';
+                floatingFooter.style.borderRadius = '';
+                floatingFooter.style.padding = '';
+                floatingFooter.style.display = '';
+                floatingFooter.style.justifyContent = '';
+                floatingFooter.style.alignItems = '';
+                toggleFooter.innerHTML = '<i class="ri-arrow-up-s-line"></i>';
+                toggleFooter.style.width = '';
+                toggleFooter.style.height = '';
+                toggleFooter.style.background = '';
+                toggleFooter.style.boxShadow = '';
+                toggleFooter.style.margin = '';
+                toggleFooter.style.display = '';
+                toggleFooter.style.alignItems = '';
+                toggleFooter.style.justifyContent = '';
+        }
+
+        toggleFooter.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isExpanded) {
+                        collapseFooter();
+                } else {
+                        expandFooter();
+                }
+                isExpanded = !isExpanded;
+        });
+
+        // Start expanded
+        expandFooter();
+
+        // Clicking the round ball expands it
+        floatingFooter.addEventListener('click', function(e) {
+                if (!isExpanded && (e.target === floatingFooter || e.target === toggleFooter)) {
+                        expandFooter();
+                        isExpanded = true;
+                }
+        });
+});
+</script>
+<!-- WhatsApp Floating Button -->
+<a href="https://wa.me/2348034567890" class="fixed bottom-6 left-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors z-50">
+<i class="ri-whatsapp-line text-white ri-xl"></i>
+</a>
+<script id="navigation-script">
+document.addEventListener('DOMContentLoaded', function() {
+const nav = document.querySelector('nav');
+const mobileMenu = document.getElementById('mobile-menu');
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const closeMenuButton = document.getElementById('close-menu-button');
+const bookingModal = document.getElementById('booking-modal');
+const navBookBtn = document.getElementById('nav-book-btn');
+const closeModalBtn = document.getElementById('close-modal');
+const bookingForm = document.getElementById('booking-form');
+const bookingIdDisplay = document.getElementById('booking-id');
+// Generate unique booking ID
+function generateBookingId() {
+const timestamp = Date.now().toString().slice(-6);
+const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+return `WM${timestamp}${random}`;
+}
+// Modal controls
+function openModal() {
+bookingModal.classList.remove('hidden');
+bookingIdDisplay.textContent = generateBookingId();
+}
+function closeModal() {
+bookingModal.classList.add('hidden');
+}
+navBookBtn.addEventListener('click', openModal);
+closeModalBtn.addEventListener('click', closeModal);
+// Close modal when clicking outside
+bookingModal.addEventListener('click', function(e) {
+if (e.target === bookingModal) {
+closeModal();
+}
+});
+// Form submission
+bookingForm.addEventListener('submit', function(e) {
+e.preventDefault();
+const loadingOverlay = document.getElementById('loading-overlay');
+loadingOverlay.classList.remove('hidden');
+setTimeout(() => {
+loadingOverlay.classList.add('hidden');
+closeModal();
+window.location.href = 'booking.html';
+}, 5000);
+});
+// Sticky navigation
+window.addEventListener('scroll', function() {
+if (window.scrollY > 50) {
+nav.classList.add('shadow-md');
+} else {
+nav.classList.remove('shadow-md');
+}
+});
+// Mobile menu toggle
+mobileMenuButton.addEventListener('click', function() {
+mobileMenu.classList.remove('translate-x-full');
+});
+closeMenuButton.addEventListener('click', function() {
+mobileMenu.classList.add('translate-x-full');
+});
+// Close mobile menu when clicking on a link
+const mobileLinks = mobileMenu.querySelectorAll('a');
+mobileLinks.forEach(link => {
+link.addEventListener('click', function() {
+mobileMenu.classList.add('translate-x-full');
+});
+});
+});
+</script>
+<script id="slider-script">
+document.addEventListener('DOMContentLoaded', function() {
+const sliderHandle = document.getElementById('slider-handle');
+const sliderContainer = document.querySelector('.slider-container');
+if (!sliderHandle || !sliderContainer) return;
+let isDragging = false;
+const updateSliderPosition = (clientX) => {
+const rect = sliderContainer.getBoundingClientRect();
+let position = (clientX - rect.left) / rect.width;
+position = Math.max(0, Math.min(1, position));
+const percentage = position * 100;
+sliderContainer.style.setProperty('--clip', `${percentage}%`);
+sliderHandle.style.left = `${percentage}%`;
+};
+sliderHandle.addEventListener('mousedown', () => {
+isDragging = true;
+});
+sliderContainer.addEventListener('mousemove', (e) => {
+if (!isDragging) return;
+updateSliderPosition(e.clientX);
+});
+window.addEventListener('mouseup', () => {
+isDragging = false;
+});
+// Touch events for mobile
+sliderHandle.addEventListener('touchstart', () => {
+isDragging = true;
+});
+sliderContainer.addEventListener('touchmove', (e) => {
+if (!isDragging) return;
+updateSliderPosition(e.touches[0].clientX);
+e.preventDefault();
+});
+window.addEventListener('touchend', () => {
+isDragging = false;
+});
+// Set initial position
+updateSliderPosition(sliderContainer.getBoundingClientRect().left + sliderContainer.getBoundingClientRect().width / 2);
+});
+</script>
+<script id="testimonial-slider-script">
+document.addEventListener('DOMContentLoaded', function() {
+const container = document.getElementById('testimonials-container');
+const prevBtn = document.getElementById('prev-testimonial');
+const nextBtn = document.getElementById('next-testimonial');
+const prevBtnMobile = document.getElementById('prev-testimonial-mobile');
+const nextBtnMobile = document.getElementById('next-testimonial-mobile');
+if (!container || (!prevBtn && !prevBtnMobile) || (!nextBtn && !nextBtnMobile)) return;
+const scrollAmount = container.offsetWidth / 3;
+const scrollLeft = () => {
+container.scrollBy({
+left: -scrollAmount,
+behavior: 'smooth'
+});
+};
+const scrollRight = () => {
+container.scrollBy({
+left: scrollAmount,
+behavior: 'smooth'
+});
+};
+if (prevBtn) prevBtn.addEventListener('click', scrollLeft);
+if (nextBtn) nextBtn.addEventListener('click', scrollRight);
+if (prevBtnMobile) prevBtnMobile.addEventListener('click', scrollLeft);
+if (nextBtnMobile) nextBtnMobile.addEventListener('click', scrollRight);
+});
+</script>
+<script id="calendar-script">
+document.addEventListener('DOMContentLoaded', function() {
+const calendarDays = document.querySelectorAll('.calendar-day:not(.inactive)');
+calendarDays.forEach(day => {
+day.addEventListener('click', function() {
+// Remove selected class from all days
+calendarDays.forEach(d => d.classList.remove('selected'));
+// Add selected class to clicked day
+this.classList.add('selected');
+});
+});
+});
+</script>
+
+<script id="animation-script">
+document.addEventListener('DOMContentLoaded', function() {
+// Animate elements when they come into view
+const animateOnScroll = () => {
+const elements = document.querySelectorAll('.service-card, .testimonial-card');
+elements.forEach(element => {
+const elementTop = element.getBoundingClientRect().top;
+const elementBottom = element.getBoundingClientRect().bottom;
+// Check if element is in viewport
+if (elementTop < window.innerHeight && elementBottom > 0) {
+element.classList.add('animate-fade-in');
+}
+});
+};
+// Run on load
+animateOnScroll();
+// Run on scroll
+window.addEventListener('scroll', animateOnScroll);
+});
+</script>
+<script id="gallery-script">
+document.addEventListener('DOMContentLoaded', function() {
+const openGalleryBtn = document.getElementById('open-gallery');
+const closeGalleryBtn = document.getElementById('close-gallery');
+const fullGallery = document.getElementById('full-gallery');
+const galleryFilters = document.querySelectorAll('.gallery-filter');
+const galleryItems = document.querySelectorAll('.gallery-item');
+if (openGalleryBtn && closeGalleryBtn && fullGallery) {
+openGalleryBtn.addEventListener('click', () => {
+fullGallery.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+});
+closeGalleryBtn.addEventListener('click', () => {
+fullGallery.classList.add('hidden');
+document.body.style.overflow = '';
+});
+fullGallery.addEventListener('click', (e) => {
+if (e.target === fullGallery) {
+fullGallery.classList.add('hidden');
+document.body.style.overflow = '';
+}
+});
+}
+if (galleryFilters && galleryItems) {
+galleryFilters.forEach(filter => {
+filter.addEventListener('click', () => {
+// Remove active class from all filters
+galleryFilters.forEach(f => f.classList.remove('active', 'bg-primary', 'text-white'));
+galleryFilters.forEach(f => f.classList.add('bg-gray-100'));
+// Add active class to clicked filter
+filter.classList.add('active', 'bg-primary', 'text-white');
+filter.classList.remove('bg-gray-100');
+const category = filter.textContent.toLowerCase();
+// Show/hide gallery items based on category
+galleryItems.forEach(item => {
+if (category === 'all works' || item.classList.contains(category.split(' ')[0])) {
+item.style.display = 'block';
+} else {
+item.style.display = 'none';
+}
+});
+});
+});
+}
+});
+</script>
+</body>
+</html>
+
+
+
